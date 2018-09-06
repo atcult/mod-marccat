@@ -2,4 +2,16 @@
 .metadata
 target
 *.iml
-.vertx
+
+#mvn build
+target/
+
+#vert.x
+.vertx/
+
+file-uploads/
+
+#eclipse
+.project
+.settings/
+.classpath
