@@ -1,7 +1,8 @@
 package org.folio.cataloging.search.engine.impl;
 
+import org.folio.cataloging.exception.ModCatalogingException;
 import org.folio.cataloging.integration.StorageService;
-import org.folio.cataloging.search.domain.LightweightJsonRecord;
+import org.folio.cataloging.search.SearchResponse;
 import org.folio.cataloging.search.domain.LightweightVerticalRecord;
 import org.folio.cataloging.search.domain.Record;
 import org.folio.cataloging.search.engine.ModCatalogingSearchEngine;
@@ -21,11 +22,17 @@ public class LightweightVerticalModCatalogingSearchEngine extends ModCatalogingS
    * @param service                 the {@link StorageService} instance.
    */
   public LightweightVerticalModCatalogingSearchEngine(final int mainLibraryId, final int databasePreferenceOrder, final StorageService service) {
-    super (mainLibraryId, databasePreferenceOrder, service);
+    super(mainLibraryId, databasePreferenceOrder, service);
   }
 
   @Override
   public Record newRecord() {
-    return new LightweightVerticalRecord( );
+    return new LightweightVerticalRecord();
+  }
+
+  @Override
+  public void injectDocCount(SearchResponse searchResponse, final StorageService storageService) throws ModCatalogingException {
+    // TODO Auto-generated method stub
+
   }
 }
