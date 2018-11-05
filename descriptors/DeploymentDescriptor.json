@@ -1,0 +1,8 @@
+{
+  "srvcId": "cataloging",
+  "nodeId": "localhost",
+  "descriptor": {
+    "exec": "java -Dport=%p -jar ../target/mod-cataloging.jar -Dhttp.port=%p embed_postgres=true"
+  }
+}
+

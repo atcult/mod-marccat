@@ -1,5 +1,5 @@
-# mod-marccat
-FOLIO metadata management / cataloging module (MARCcat)
+# mod-cataloging
+FOLIO metadata management / cataloging module 
 
 # Goal
 
@@ -7,11 +7,11 @@ FOLIO compatible cataloging module.
 
 # Prerequisites
 
-* Java 8 JDK
-* Maven 3.3.9
-* Postgres 9.6.1 (running and listening on localhost:5432, logged in user must have admin rights)
-* Node 6.4.0 (for API linting and documentation generation)
-* NPM 3.10.3 (for API linting and documentation generation)
+- Java 8 JDK
+- Maven 3.3.9
+- Postgres 9.6.1 (running and listening on localhost:5432, logged in user must have admin rights)
+- Node 6.4.0 (for API linting and documentation generation)
+- NPM 3.10.3 (for API linting and documentation generation)
 
 # Preparation
 
@@ -28,5 +28,3 @@ More information is available on the [developer site](https://dev.folio.org/guid
 ## Issues
 
 Issues are managed here https://issues.folio.org/projects/MODCAT/issues
-
-Other FOLIO Developer documentation is at [dev.folio.org](https://dev.folio.org/)

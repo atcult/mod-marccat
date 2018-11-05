@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ########################################################
-# deploy Folio mod-marccat
+# deploy Folio mod-cataloging
 #
 # Author : Christian Chiama - christian.chiama@atcult.it
 # Version: 1.0
