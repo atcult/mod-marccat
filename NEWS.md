@@ -1,3 +1,8 @@
-## 0.1.0 2018-09-30
- * Initial work
- * Basic CRUD interfaces in place
+## 1.1.0 Unreleased
+ * Improve Search Functionality
+ * Template Management
+ * Holding Management
+ 
+## 1.0.0 2018-10-31
+ * Initial release
+ * Search Functionality interface

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ########################################################
-# Synchronise remote test Folio mod-cataloging
+# Synchronise remote test Folio mod-marccat
 #
 # Author : Christian Chiama - christian.chiama@atcult.it
 # Version: 1.0
@@ -33,4 +33,9 @@ ssh_itnet_deploy_demo(){
   nohup java -jar ${SSH_SRC_FILE} | ssh -p ${SSH_PORT} root@${SSH_HOST_DEMO} &
   echo "uploaded artifact succesfully. Deploy last demo release of modcat"
 }
+sendmail(){
+   echo "deploy on ${SSH_HOST} on $(date) succefully "| mail -s "Deploy Mod Cataloging" christian.chiama@atcult.it
+}
+
 ssh_itnet_deploy
+sendmail
