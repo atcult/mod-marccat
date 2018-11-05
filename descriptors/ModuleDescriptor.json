@@ -1,35 +1,49 @@
 {
-  "id": "${artifactId}:${version}",
-  "name": "MARCcat Module",
+  "id": "cataloging",
+  "name": "Cataloging",
+  "requires": [
+    {
+      "id": "cataloging",
+      "version": "1.0"
+    }
+  ],
   "provides": [
     {
-      "id": "marccat",
+      "id": "cataloging",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/search",
-          "permissionsRequired": [],
-          "modulePermissions": [
-          ]
-        }, {
-          "methods": ["GET"],
-          "pathPattern": "/searchVertical",
-          "permissionsRequired": [],
-          "modulePermissions": [
-          ]
+          "pathPattern": "/record-templates",
+          "permissionsRequired": []
+        }
+      ]
+    },
+    {
+      "id": "_tenant",
+      "version": "1.0",
+      "interfaceType": "system",
+      "handlers": [
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/_/tenant"
+        },
+        {
+          "methods": [
+            "DELETE"
+          ],
+          "pathPattern": "/_/tenant"
         }
       ]
     }
   ],
-  "permissionSets": [
-
-  ],
+  "permissionSets": [],
   "launchDescriptor": {
-    "exec": "java -Dport=%p -jar ./target/mod-cataloging-1.0.jar",
     "dockerImage": "${artifactId}:${version}",
     "dockerArgs": {
-      "HostConfig": { "PortBindings": { "9403/tcp":  [{ "HostPort": "%p" }] } }
+      "HostConfig": { "PortBindings": { "8081/tcp":  [{ "HostPort": "%p" }] } }
     },
     "dockerPull" : false
   }
