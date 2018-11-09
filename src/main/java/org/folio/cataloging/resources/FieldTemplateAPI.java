@@ -172,7 +172,7 @@ public class FieldTemplateAPI extends BaseResource {
         fixedField.setCategoryOfMaterial(categoryOfMaterial);
         setPhysicalInformationValues(fixedField, valueField);
 
-      } else if (code.equals(Global.DATETIME_TRANSACION_TAG_CODE)) {
+      } else if (code.equals(Global.DATETIME_TRANSACTION_TAG_CODE)) {
         fixedField.setDescription(storageService.getHeadingTypeDescription(
           headerTypeCode, lang, Global.INT_CATEGORY));
         fixedField.setDisplayValue(F.getFormattedToday("yyyyMMddHHmmss."));
