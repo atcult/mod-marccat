@@ -109,13 +109,13 @@ public class BibliographicRecordAPI extends BaseResource {
 
       FixedField fixed005 = new FixedField();
       fixed005.setHeaderTypeCode(Global.DATETIME_TRANSACION_HEADER_TYPE);
-      fixed005.setCode(Global.DATETIME_TRANSACION_TAG_CODE);
+      fixed005.setCode(Global.DATETIME_TRANSACTION_TAG_CODE);
       fixed005.setDisplayValue(F.getFormattedToday("yyyyMMddHHmmss."));
       fixed005.setCategoryCode(Global.INT_CATEGORY);
       fixed005.setDescription(storageService.getHeadingTypeDescription(Global.DATETIME_TRANSACION_HEADER_TYPE, lang, Global.INT_CATEGORY));
 
       final Field field = new Field();
-      field.setCode(Global.DATETIME_TRANSACION_TAG_CODE);
+      field.setCode(Global.DATETIME_TRANSACTION_TAG_CODE);
       field.setMandatory(true);
       field.setFixedField(fixed005);
       field.setFieldStatus(Field.FieldStatus.NEW);
@@ -162,8 +162,14 @@ public class BibliographicRecordAPI extends BaseResource {
             field.getCode().equalsIgnoreCase(Global.PHYSICAL_DESCRIPTION_TAG_CODE)).forEach(field -> {
 
           FixedField ff = field.getFixedField();
+          final int headerTypeCode = ff.getHeaderTypeCode();
+
           if (field.getCode().equalsIgnoreCase(Global.MATERIAL_TAG_CODE) || field.getCode().equalsIgnoreCase(Global.OTHER_MATERIAL_TAG_CODE)) {
-            final Map <String, Object> mapRecordTypeMaterial = storageService.getMaterialTypeInfosByLeaderValues(leader.getValue().charAt(6), leader.getValue().charAt(7), field.getCode());
+
+            final Map <String, Object> mapRecordTypeMaterial = (field.getCode().equalsIgnoreCase(Global.MATERIAL_TAG_CODE))
+              ?storageService.getMaterialTypeInfosByLeaderValues(leader.getValue().charAt(6), leader.getValue().charAt(7), field.getCode())
+              :storageService.getMaterialTypeInfosByHeaderCode(headerTypeCode, field.getCode());
+
             ConversionFieldUtils.setMaterialValuesInFixedField(ff, (String) mapRecordTypeMaterial.get(Global.FORM_OF_MATERIAL_LABEL));
           } else
             ConversionFieldUtils.setPhysicalInformationValuesInFixedField(ff);
