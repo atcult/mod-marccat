@@ -104,7 +104,7 @@ public abstract class Global {
   public final static String LEADER_TAG_NUMBER = "000";
   public final static String CONTROL_NUMBER_TAG_CODE = "001";
   public final static String CATALOGING_SOURCE_TAG_CODE = "040";
-  public final static String DATETIME_TRANSACION_TAG_CODE = "005";
+  public final static String DATETIME_TRANSACTION_TAG_CODE = "005";
   public final static String MATERIAL_TAG_CODE = "008";
   public final static String OTHER_MATERIAL_TAG_CODE = "006";
   public final static String PHYSICAL_DESCRIPTION_TAG_CODE = "007";
