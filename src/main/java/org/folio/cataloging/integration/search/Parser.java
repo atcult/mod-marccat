@@ -6,6 +6,7 @@ import org.folio.cataloging.dao.DAOIndexList;
 import org.folio.cataloging.dao.persistence.IndexList;
 import org.folio.cataloging.log.Log;
 import org.folio.cataloging.log.MessageCatalog;
+import org.folio.cataloging.business.common.View;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Locale;
  *
  * @author paulm
  * @author agazzarini
+ * @author carment
  * @since 1.0
  */
 public class Parser {
@@ -44,18 +46,28 @@ public class Parser {
   }
 
   /**
-   * Parses the incoming CCL query.
+   * Parses the incoming CCL query, sort and page the results
    *
    * @param ccl the CCL query.
+   * @param firstRecord the first record.
+   * @param lastRecord the last record.
+   * @param attributes the attributes of the search index.
+   * @param directions the directions asc or desc.
    * @return the parsed string.
    * @throws CclParserException in case of parsing failure.
    */
-  public String parse(final String ccl) throws CclParserException {
+  public String parse(final String ccl, final int firstRecord, final int lastRecord, final String[] attributes,  String[] directions) throws CclParserException {
     final Tokenizer tokenizer = new Tokenizer().tokenize(ccl);
-
     final ExpressionNode n = parse(tokenizer.getTokens());
-
-    final String query = "select * from ((" + n.getValue() + ")) foo order by 1 desc";
+    final int limitSize = (lastRecord - firstRecord) + 1;
+    final int offsetSize = firstRecord - 1;
+    final String orderByClause = buildOrderByClause(attributes, directions);
+    final String columnSortForm = getSortFormByAtributes(attributes);
+    final String columnItemNumber = searchingView == -1 ? "aut_nbr" : "bib_itm_nbr";
+    final String query = "select res."+ columnItemNumber +
+                         " from (select distinct "+ columnSortForm +" smtc."+ columnItemNumber +" from ((" + n.getValue() + ")) smtc " +
+                         orderByClause +  ") res"+
+                         " limit "+ limitSize +" offset "+ offsetSize;
     logger.debug(
       MessageCatalog._00020_SE_QUERY,
       ccl, query);
@@ -208,4 +220,80 @@ public class Parser {
       return expr;
     }
   }
+
+  /**
+   * Builds the ordering clause through the attributes and the directions.
+   *
+   * @param attributes the attributes of the search index.
+   * @param directions the directions asc or desc.
+   * @return the ordering clause
+   */
+  private String buildOrderByClause(
+    final String[] attributes,
+    final String[] directions) {
+    final String columnItemNumber = (searchingView == -1) ? "aut_nbr " : "bib_itm_nbr ";
+    final String sort = (directions.length >0 && directions[0].equals("0")) ? "asc" : "desc";
+    final String columnSortForm = getSortFormByAtributes(attributes);
+    String orderByItemNumber =  String.format(" order by smtc."+ columnItemNumber +" %s ", sort);
+    String orderBySortForm = String.format(" order by "+columnSortForm.replace(",","")+" %s, smtc."+ columnItemNumber, sort);
+    String orderByClause = orderByItemNumber;
+    for (String attribute : attributes) {
+      switch (Integer.parseInt(attribute)) {
+        case 4:
+          orderByClause = (searchingView == -1) ? SQLCommand.TITLE_AUT_JOIN : SQLCommand.TITLE_JOIN;
+          orderByClause += viewClause() + orderBySortForm;
+          break;
+        case 1003:
+          orderByClause = (searchingView == -1) ? SQLCommand.NME_AUT_JOIN : SQLCommand.NAME_JOIN;
+          orderByClause += viewClause() + orderBySortForm;
+          break;
+        case 2096:
+          orderByClause = SQLCommand.UNIFORM_TITLE_JOIN + viewClause() + orderBySortForm;
+          break;
+        case 54:
+          orderByClause = orderByItemNumber;
+          break;
+        case 21:
+          orderByClause = SQLCommand.SUBJECT_AUT_JOIN + viewClause() + orderBySortForm;
+          break;
+        }
+
+    }
+    return orderByClause;
+  }
+
+  /**
+   * Return the column of the sort form for the ordering clause.
+   *
+   * @param attributes the attributes of the search index.
+   * @return the column of the sort form
+   */
+  private String getSortFormByAtributes( final String[] attributes) {
+    String sortForm = "";
+    for (final String attribute : attributes) {
+      switch (Integer.parseInt(attribute)) {
+        case 4:
+        case 2096:
+          sortForm = "t2.ttl_hdg_srt_form,";
+          break;
+        case 1003:
+          sortForm = "t2.nme_hdg_srt_form,";
+          break;
+        case 21:
+          sortForm = "t2.sbjct_hdg_srt_form,";
+          break;
+      }
+    }
+    return sortForm;
+  }
+
+  /**
+   * Return the view clause.
+   *
+   * @return the view clause
+   */
+  private String viewClause() {
+    return (searchingView != 0 && searchingView !=-1) ? String.format(" AND (t1.usr_vw_ind = '%s')",View.makeSingleViewString(this.searchingView)) : "";
+  }
+
 }
