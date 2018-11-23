@@ -2,6 +2,7 @@ package org.folio.cataloging.integration.search;
 
 import net.sf.hibernate.Session;
 import org.folio.cataloging.business.common.DataAccessException;
+import org.folio.cataloging.business.common.View;
 import org.folio.cataloging.business.descriptor.SortFormParameters;
 import org.folio.cataloging.dao.NameDescriptorDAO;
 import org.folio.cataloging.dao.SemanticDAO;
@@ -76,13 +77,13 @@ public class TermExpressionNode implements ExpressionNode {
           s = s.substring(0, startOfTerm) + newText + s.substring(endOfTerm + 1);
         }
       }
-
       return "select distinct "
         + semantic().getSelectClause()
         + " from "
         + semantic().getFromClause()
         + " where "
         + (semantic().getJoinClause() == null ? "" : semantic.getJoinClause()) + s + viewClause();
+
     } catch (final Exception exception) {
       logger.error(MessageCatalog._00010_DATA_ACCESS_FAILURE, exception);
       throw new CclParserException("Query not supported");
@@ -298,7 +299,7 @@ public class TermExpressionNode implements ExpressionNode {
       } else if (semantic().getPositionNumber() == 3 && semantic().isFullText()) {
         viewClause = String.format(" AND (%s.usr_vw_cde = %d)", semantic().getViewClause(), getSearchingView());
       } else {
-        viewClause = String.format(" AND (SUBSTR(%s.usr_vw_ind, %d, 1) = '1')", semantic().getViewClause(), getSearchingView());
+        viewClause = String.format(" AND (%s.usr_vw_ind = '%s')", semantic().getViewClause(), View.makeSingleViewString(getSearchingView()));
       }
     }
     return viewClause;

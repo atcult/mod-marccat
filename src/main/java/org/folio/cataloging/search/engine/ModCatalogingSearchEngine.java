@@ -56,7 +56,7 @@ public abstract class ModCatalogingSearchEngine implements SearchEngine {
   }
 
   @Override
-  public SearchResponse expertSearch(final String cclQuery, final Locale locale, final int searchingView) throws ModCatalogingException {
+  public SearchResponse expertSearch(final String cclQuery, final Locale locale, final int searchingView, final int firstRecord, final int lastRecord, final String[] attributes, final String[] directions) throws ModCatalogingException {
     return new SearchResponse(
       searchingView,
       cclQuery,
@@ -64,16 +64,29 @@ public abstract class ModCatalogingSearchEngine implements SearchEngine {
         cclQuery,
         mainLibraryId,
         locale,
-        searchingView)
+        searchingView,
+        firstRecord,
+        lastRecord,
+        attributes,
+        directions
+        )
         .stream()
         .mapToInt(Integer::intValue).toArray());
   }
 
   @Override
+  @Deprecated
+  public SearchResponse expertSearch(final String cclQuery, final Locale locale, final int searchingView) throws ModCatalogingException {
+    return null;
+  }
+
+
+
+  @Override
   public SearchResponse fetchRecords(final SearchResponse response, final String elementSetName, final int firstRecord, final int lastRecord) {
     final AtomicInteger searchingView = new AtomicInteger(response.getSearchingView());
     response.setRecordSet(
-      rangeClosed(firstRecord, lastRecord)
+        rangeClosed(firstRecord, lastRecord)
         .map(index -> index - 1)
         .filter(pos -> response.getIdSet().length > pos)
         .mapToObj(pos -> {
