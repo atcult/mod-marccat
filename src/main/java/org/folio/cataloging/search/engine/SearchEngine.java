@@ -15,7 +15,7 @@ import java.util.Locale;
  * @since 1.0
  */
 public interface SearchEngine {
-  /**
+   /**
    * Expert search interface contract.
    *
    * @param cclQuery      the input CCL query.
@@ -25,6 +25,22 @@ public interface SearchEngine {
    * @throws ModCatalogingException in case of a search subsystem failure.
    */
   SearchResponse expertSearch(String cclQuery, Locale locale, int searchingView) throws ModCatalogingException;
+
+  /**
+   * Expert search interface contract.
+   *
+   * @param cclQuery      the input CCL query.
+   * @param locale        the current locale.
+   * @param searchingView the searching view associated with the current query execution.
+   * @param firstRecord the first record.
+   * @param lastRecord the last record.
+   * @param attributes the attributes of the search index.
+   * @param directions the directions asc or desc.
+   * @return a search response (containing only the docids)
+   * @throws ModCatalogingException in case of a search subsystem failure.
+   */
+  SearchResponse expertSearch(String cclQuery, Locale locale, int searchingView, int firstRecord, int lastRecord, String[] attributes, String[] directions) throws ModCatalogingException;
+
 
   /**
    * Simple search interface contract.

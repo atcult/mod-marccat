@@ -4,10 +4,13 @@ import io.swagger.annotations.Api;
 import org.folio.cataloging.Global;
 import org.folio.cataloging.ModCataloging;
 import org.folio.cataloging.business.common.View;
+import org.folio.cataloging.integration.StorageService;
 import org.folio.cataloging.search.SearchEngineFactory;
 import org.folio.cataloging.search.SearchResponse;
 import org.folio.cataloging.search.engine.SearchEngine;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 import static org.folio.cataloging.F.locale;
 import static org.folio.cataloging.integration.CatalogingHelper.doGet;
@@ -35,20 +38,21 @@ public class SearchAPI extends BaseResource {
     @RequestParam(name = "dpo", defaultValue = "1") final int databasePreferenceOrder,
     @RequestParam(name = "sortBy", required = false) final String[] sortAttributes,
     @RequestParam(name = "sortOrder", required = false) final String[] sortOrders) {
-    return doGet((storageService, configuration) -> {
+    return doGet((StorageService storageService, Map <String, String> configuration) -> {
       final SearchEngine searchEngine =
         SearchEngineFactory.create(
           SearchEngineFactory.EngineType.LIGHTWEIGHT,
           mainLibraryId,
           databasePreferenceOrder,
           storageService);
-      SearchResponse response = searchEngine.fetchRecords(
-        (sortAttributes != null && sortOrders != null && sortAttributes.length == sortOrders.length)
-          ? searchEngine.sort(searchEngine.expertSearch(q, locale(lang), view), sortAttributes, sortOrders)
-          : searchEngine.expertSearch(q, locale(lang), view),
+      SearchResponse response;
+
+      response = searchEngine.fetchRecords(
+        searchEngine.expertSearch(q, locale(lang), view, from, to, sortAttributes, sortOrders),
         "F",
-        from,
-        to);
+        1,
+        ((to - from) + 1));
+
       final int AUTHORITY_VIEW = -1;
       if (view == AUTHORITY_VIEW) {
         searchEngine.injectDocCount(response, storageService);
@@ -82,8 +86,8 @@ public class SearchAPI extends BaseResource {
           ? searchEngine.sort(searchEngine.expertSearch(q, locale(lang), view), sortAttributes, sortOrders)
           : searchEngine.expertSearch(q, locale(lang), view),
         "F",
-        from,
-        to);
+        1,
+        ((to - from) + 1));
     }, tenant, configurator);
   }
 
