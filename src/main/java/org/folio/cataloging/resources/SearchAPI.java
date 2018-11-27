@@ -10,6 +10,8 @@ import org.folio.cataloging.search.SearchResponse;
 import org.folio.cataloging.search.engine.SearchEngine;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.folio.cataloging.F.locale;
@@ -59,6 +61,65 @@ public class SearchAPI extends BaseResource {
       }
       return response;
     }, tenant, configurator);
+  }
+
+  @GetMapping("/mergedSearch")
+  public List<SearchResponse> mergedSearch(
+    @RequestParam final String lang,
+    @RequestHeader(Global.OKAPI_TENANT_HEADER_NAME) final String tenant,
+    @RequestParam("q") final String q,
+    @RequestParam(name = "from", defaultValue = "1") final int from,
+    @RequestParam(name = "to", defaultValue = "10") final int to,
+    @RequestParam(name = "ml", defaultValue = "170") final int mainLibraryId,
+    @RequestParam(name = "dpo", defaultValue = "1") final int databasePreferenceOrder,
+    @RequestParam(name = "sortBy", required = false) final String[] sortAttributes,
+    @RequestParam(name = "sortOrder", required = false) final String[] sortOrders) {
+
+
+    SearchResponse authRecords =  doGet((storageService, configuration) -> {
+      final SearchEngine searchEngine =
+        SearchEngineFactory.create(
+          SearchEngineFactory.EngineType.LIGHTWEIGHT,
+          mainLibraryId,
+          databasePreferenceOrder,
+          storageService);
+
+      SearchResponse response = searchEngine.fetchRecords(
+        (sortAttributes != null && sortOrders != null && sortAttributes.length == sortOrders.length)
+          ? searchEngine.sort(searchEngine.expertSearch(q, locale(lang), View.AUTHORITY), sortAttributes, sortOrders)
+          : searchEngine.expertSearch(q, locale(lang), View.AUTHORITY),
+        "F",
+        from,
+        to);
+
+      searchEngine.injectDocCount(response, storageService);
+
+      return response;
+    }, tenant, configurator);
+
+    SearchResponse bibRecords =  doGet((storageService, configuration) -> {
+      final SearchEngine searchEngine =
+        SearchEngineFactory.create(
+          SearchEngineFactory.EngineType.LIGHTWEIGHT,
+          mainLibraryId,
+          databasePreferenceOrder,
+          storageService);
+
+      SearchResponse response = searchEngine.fetchRecords(
+        (sortAttributes != null && sortOrders != null && sortAttributes.length == sortOrders.length)
+          ? searchEngine.sort(searchEngine.expertSearch(q, locale(lang), View.DEFAULT_BIBLIOGRAPHIC_VIEW), sortAttributes, sortOrders)
+          : searchEngine.expertSearch(q, locale(lang), View.DEFAULT_BIBLIOGRAPHIC_VIEW),
+        "F",
+        from,
+        to);
+
+      return response;
+    }, tenant, configurator);
+    List<SearchResponse> mergedResult = new ArrayList<>();
+    mergedResult.add(authRecords);
+    mergedResult.add(bibRecords);
+
+    return mergedResult;
   }
 
   @GetMapping("/searchVertical")
