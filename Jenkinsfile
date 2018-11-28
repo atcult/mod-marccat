@@ -52,7 +52,7 @@ pipeline {
              }
          }
           stage('Publish Npm') {
-      
+
                    steps {
                      echo 'Publishing on Npm....'
               }
