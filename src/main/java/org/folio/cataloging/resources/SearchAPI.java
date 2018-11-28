@@ -10,9 +10,7 @@ import org.folio.cataloging.search.SearchResponse;
 import org.folio.cataloging.search.engine.SearchEngine;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.folio.cataloging.F.locale;
 import static org.folio.cataloging.integration.CatalogingHelper.doGet;
