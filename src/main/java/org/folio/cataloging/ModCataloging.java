@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 public class ModCataloging {
 
-  public static final String BASE_URI = "cataloging";
+  public static final String BASE_URI = "marccat";
 
   /**
    * Module entry point.

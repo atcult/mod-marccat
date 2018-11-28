@@ -27,9 +27,7 @@ pipeline {
           }
         }
         stage('Deploy'){
-            when {
-                 expression { BRANCH_NAME ==~ /(master|develop|release)/ }
-                 }
+
              steps{
                   script{
                        withEnv(['JENKINS_NODE_COOKIE=dontkill']) {
@@ -39,9 +37,7 @@ pipeline {
                 }
         }
         stage('Deploy ITNET'){
-               when {
-                  expression { BRANCH_NAME ==~ /(master|develop|release)/ }
-              }
+
                steps{
                     script{
                          withEnv(['JENKINS_NODE_COOKIE=dontkill']) {
@@ -51,17 +47,12 @@ pipeline {
                         }
          }
          stage('Publish API Docs') {
-             when {
-               expression { BRANCH_NAME ==~ /(master|develop|release)/ }
-             }
              steps {
                 echo 'Publishing API Docs....'
              }
          }
           stage('Publish Npm') {
-                   when {
-                      expression { BRANCH_NAME ==~ /(master|develop|release)/ }
-                 }
+      
                    steps {
                      echo 'Publishing on Npm....'
               }
