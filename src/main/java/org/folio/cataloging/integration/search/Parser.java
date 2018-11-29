@@ -232,7 +232,7 @@ public class Parser {
     final String[] attributes,
     final String[] directions) {
     final String columnItemNumber = (searchingView == -1) ? "aut_nbr " : "bib_itm_nbr ";
-    final String sort = (directions.length >0 && directions[0].equals("0")) ? "asc" : "desc";
+    final String sort = (directions != null && directions[0].equals("0")) ? "asc" : "desc";
     final String columnSortForm = getSortFormByAtributes(attributes);
     String orderByItemNumber =  String.format(" order by smtc."+ columnItemNumber +" %s ", sort);
     String orderBySortForm = String.format(" order by "+columnSortForm.replace(",","")+" %s, smtc."+ columnItemNumber, sort);
