@@ -27,7 +27,6 @@ pipeline {
           }
         }
         stage('Deploy'){
-
              steps{
                   script{
                        withEnv(['JENKINS_NODE_COOKIE=dontkill']) {
@@ -37,7 +36,6 @@ pipeline {
                 }
         }
         stage('Deploy ITNET'){
-
                steps{
                     script{
                          withEnv(['JENKINS_NODE_COOKIE=dontkill']) {
@@ -52,7 +50,6 @@ pipeline {
              }
          }
           stage('Publish Npm') {
-
                    steps {
                      echo 'Publishing on Npm....'
               }
