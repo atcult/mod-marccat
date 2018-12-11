@@ -209,7 +209,8 @@ public class AuthorityCatalogDAO extends CatalogDAO {
         new Object[]{item.getAmicusNumber()},
         new Type[]{Hibernate.INTEGER});
 
-    loadHeadings(apfs, AuthorityCatalog.CATALOGUING_VIEW);
+    //TODO session missing
+    //loadHeadings(apfs, AuthorityCatalog.CATALOGUING_VIEW);
 
     return apfs;
   }

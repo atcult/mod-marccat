@@ -37,6 +37,7 @@ public class GlobalStorage {
   public final static int CLASSIFICATION_CATEGORY = 6;
   public final static int PUBLISHER_CATEGORY = 7;
   public final static int BIB_NOTE_CATEGORY = 7;
+  public final static int NAME_TITLE_CATEGORY = 11;
 
   public final static int CATALOGING_SOURCE_HEADER_TYPE = 1;
   public final static int LEADER_HEADER_TYPE = 15;

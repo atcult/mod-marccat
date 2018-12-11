@@ -22,6 +22,7 @@ public interface MessageCatalogStorage {
   String _00020_LOCK_FAILURE = "<" + MODULE_NAME + "-00020> : Lock record failure. Record already in use (-id:%d -username:%s).";
   String _00021_UNLOCK_FAILURE = "<" + MODULE_NAME + "-00021> : Unlock record failure (-id:%d -username:%s).";
   String _00022_DELETE_RECORD_FAILURE = "<" + MODULE_NAME + "-00022> : Error during record delete %d.";
+  String _00023_SAVE_TEMPLATE_ASSOCIATED_FAILURE = "<" + MODULE_NAME + "-00023> : Error during save or update record template %d, associated to record %d.";
 
   String _00030_LOAD_RECORDS_FAILURE = "<" + MODULE_NAME + "-00030> : Error during records loading.";
   String _00031_LOAD_FROM_FILE_FAILURE = "<" + MODULE_NAME + "-00031> : Error during load from file procedure. File %s not loaded.";

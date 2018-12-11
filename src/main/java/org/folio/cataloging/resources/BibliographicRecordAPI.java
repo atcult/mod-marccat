@@ -11,6 +11,7 @@ import org.folio.cataloging.business.common.DataAccessException;
 import org.folio.cataloging.business.common.View;
 import org.folio.cataloging.domain.ConversionFieldUtils;
 import org.folio.cataloging.exception.DuplicateTagException;
+import org.folio.cataloging.integration.GlobalStorage;
 import org.folio.cataloging.integration.StorageService;
 import org.folio.cataloging.log.MessageCatalog;
 import org.folio.cataloging.resources.domain.*;
@@ -56,15 +57,15 @@ public class BibliographicRecordAPI extends BaseResource {
     @RequestParam(name = "view", defaultValue = View.DEFAULT_BIBLIOGRAPHIC_VIEW_AS_STRING) final int view,
     @RequestHeader(Global.OKAPI_TENANT_HEADER_NAME) final String tenant) {
     return doGet((storageService, configuration) -> {
-
-      final BibliographicRecord record = storageService.getBibliographicRecordById(id, view);
+      final ContainerRecordTemplate container = storageService.getBibliographicRecordById(id, view);
+      final BibliographicRecord record = container.getBibliographicRecord();
       if (record != null)
         resetStatus(record);
       else {
-        return new ResponseEntity <>(record, HttpStatus.NOT_FOUND);
+        return new ResponseEntity <>(container, HttpStatus.NOT_FOUND);
       }
 
-      return new ResponseEntity <>(record, HttpStatus.OK);
+      return new ResponseEntity <>(container, HttpStatus.OK);
     }, tenant, configurator);
   }
 
@@ -140,16 +141,22 @@ public class BibliographicRecordAPI extends BaseResource {
   })
   @PostMapping("/bibliographic-record")
   public ResponseEntity <Object> save(
-    @RequestBody final BibliographicRecord record,
+    @RequestBody final ContainerRecordTemplate container,
     @RequestParam(name = "view", defaultValue = View.DEFAULT_BIBLIOGRAPHIC_VIEW_AS_STRING) final int view,
     @RequestParam final String lang,
     @RequestHeader(Global.OKAPI_TENANT_HEADER_NAME) final String tenant) {
 
     return doPost((storageService, configuration) -> {
       try {
+
+        final BibliographicRecord record = container.getBibliographicRecord();
+        final RecordTemplate template = ofNullable(container.getRecordTemplate()).get();
+
+        record.getFields().forEach(field -> setCategory(field, storageService));
+
         final Integer itemNumber = record.getId();
         final ErrorCollection errors = validate(record, storageService);
-        if (errors.getErrors().size() > 0)
+        if (!errors.getErrors().isEmpty())
           return systemInternalFailure(new DataAccessException(), errors);
 
         final GeneralInformation gi = new GeneralInformation();
@@ -172,19 +179,19 @@ public class BibliographicRecordAPI extends BaseResource {
 
             ConversionFieldUtils.setMaterialValuesInFixedField(ff, (String) mapRecordTypeMaterial.get(Global.FORM_OF_MATERIAL_LABEL));
           } else
-            ConversionFieldUtils.setPhysicalInformationValuesInFixedField(ff);
+              ConversionFieldUtils.setPhysicalInformationValuesInFixedField(ff);
         });
 
-        storageService.saveBibliographicRecord(record, view, gi, lang);
-        final BibliographicRecord recordSaved = storageService.getBibliographicRecordById(itemNumber, view);
-        resetStatus(recordSaved);
+        storageService.saveBibliographicRecord(record, template, view, gi, lang);
+        final ContainerRecordTemplate containerSaved = storageService.getBibliographicRecordById(itemNumber, view);
+        resetStatus(containerSaved.getBibliographicRecord());
+        return new ResponseEntity <>(containerSaved, HttpStatus.OK);
 
-        return new ResponseEntity <>(recordSaved, HttpStatus.OK);
       } catch (final Exception exception) {
         logger.error(MessageCatalog._00010_DATA_ACCESS_FAILURE, exception);
-        return record;
+        return container;
       }
-    }, tenant, configurator, () -> isNotNullOrEmpty(record.getId().toString()), "bibliographic", "material");
+    }, tenant, configurator, () -> isNotNullOrEmpty(container.getBibliographicRecord().getId().toString()), "bibliographic", "material");
   }
 
 
@@ -254,7 +261,7 @@ public class BibliographicRecordAPI extends BaseResource {
   private String checkEmptyTag(final BibliographicRecord record) {
     StringBuilder tags = new StringBuilder();
     record.getFields().forEach(field -> {
-      if (!isFixedField(field)) { // && (field.getFieldStatus() != Field.FieldStatus.NEW && field.getFieldStatus() != Field.FieldStatus.CHANGED)
+      if (!isFixedField(field)) {
         final StringText st = new StringText(field.getVariableField().getValue());
         if (st.isEmpty()) {
           tags.append(field.getCode()).append(",");
@@ -313,7 +320,7 @@ public class BibliographicRecordAPI extends BaseResource {
     });
     ArrayList <String> result = new ArrayList <>(Global.MANDATORY_FIELDS);
     result.retainAll(found);
-    return result.size() == Global.MANDATORY_FIELDS.size() && found.size() > 0;
+    return result.size() == Global.MANDATORY_FIELDS.size() && !found.isEmpty();
   }
 
   /**
@@ -333,42 +340,36 @@ public class BibliographicRecordAPI extends BaseResource {
    * @return category.
    */
   private int getCategory(final Field field) {
-    return (isFixedField(field))
-      ?
-      field.getFixedField().getCategoryCode() :
-      field.getVariableField().getCategoryCode();
+
+    if (isFixedField(field))
+      return GlobalStorage.HEADER_CATEGORY;
+
+    if (!isFixedField(field) && ofNullable(field.getVariableField().getCategoryCode()).isPresent())
+      return field.getVariableField().getCategoryCode();
+
+    return 0;
   }
 
+  /**
+   * Sets category code on field.
+   *
+   * @param field -- the field to set category.
+   * @param storageService -- the storageService module.
+   */
+  private void setCategory(final Field field, final StorageService storageService) {
+    if (isFixedField(field))
+      field.getFixedField().setCategoryCode(GlobalStorage.HEADER_CATEGORY);
+    else
+      if (getCategory(field) == 0){
+        boolean hasTitle = ((field.getCode().endsWith("00") || field.getCode().endsWith("10") || field.getCode().endsWith("11"))
+          && field.getVariableField().getValue().contains(GlobalStorage.DOLLAR+"t"));
 
-   /* @GetMapping("/search")
-    public SearchResponse search(
-            @RequestParam final String lang,
-            @RequestHeader(Global.OKAPI_TENANT_HEADER_NAME) final String tenant,
-            @RequestParam("q") final String q,
-            @RequestParam(name = "from", defaultValue = "1") final int from,
-            @RequestParam(name = "to", defaultValue = "10") final int to,
-            @RequestParam(name = "view", defaultValue = View.DEFAULT_BIBLIOGRAPHIC_VIEW_AS_STRING) final int view,
-            @RequestParam("ml") final int mainLibraryId,
-            @RequestParam(name = "dpo", defaultValue = "1") final int databasePreferenceOrder,
-            @RequestParam(name = "sortBy", required = false) final String[] sortAttributes,
-            @RequestParam(name = "sortOrder", required = false) final String[] sortOrders) {
-        return doGet((storageService, configuration) -> {
-            final SearchEngine searchEngine =
-                    SearchEngineFactory.create(
-                            SearchEngineType.LIGHTWEIGHT,
-                            mainLibraryId,
-                            databasePreferenceOrder,
-                            storageService);
+        final int category = storageService.getTagCategory(field.getCode(),
+          field.getVariableField().getInd1().charAt(0), field.getVariableField().getInd2().charAt(0), hasTitle);
+        field.getVariableField().setCategoryCode(category);
+      }
 
-            return searchEngine.fetchRecords(
-                    (sortAttributes != null && sortOrders != null && sortAttributes.length == sortOrders.length)
-                            ? searchEngine.sort(searchEngine.expertSearch(q, locale(lang), view), sortAttributes, sortOrders)
-                            : searchEngine.expertSearch(q, locale(lang), view),
-                    "F",
-                    from,
-                    to);
-        }, tenant, configurator);
-    }*/
+  }
 
   /**
    * Sets the default leader value.

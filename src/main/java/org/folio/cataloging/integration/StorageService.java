@@ -64,41 +64,42 @@ import static org.folio.cataloging.F.locale;
 public class StorageService implements Closeable {
 
   private static final Log logger = new Log(StorageService.class);
-  private final static Map <Integer, Class> FIRST_CORRELATION_HEADING_CLASS_MAP = new HashMap <Integer, Class>() {
-    {
-      put(1, T_BIB_HDR.class);
-      put(2, NameType.class);
-      put(17, NameType.class); //from heading
-      put(3, TitleFunction.class);
-      put(22, TitleFunction.class); //from heading
-      put(4, SubjectType.class);
-      put(18, SubjectType.class); //from heading
-      put(5, ControlNumberType.class);
-      put(19, ControlNumberType.class); //from heading
-      put(6, ClassificationType.class);
-      put(20, ClassificationType.class); //from heading
-      put(7, BibliographicNoteType.class); //note
-      put(8, BibliographicRelationType.class);//relationship
-      put(11, T_NME_TTL_FNCTN.class); //nt
-    }
-  };
-  private final static Map <Integer, Class> SECOND_CORRELATION_CLASS_MAP = new HashMap <Integer, Class>() {
-    {
-      put(2, NameSubType.class);
-      put(3, TitleSecondaryFunction.class);
-      put(4, SubjectFunction.class);
-      put(5, ControlNumberFunction.class);
-      put(6, ClassificationFunction.class);
-      put(11, NameType.class);
-    }
-  };
-  private final static Map <Integer, Class> THIRD_CORRELATION_HEADING_CLASS_MAP = new HashMap <Integer, Class>() {
-    {
-      put(2, NameFunction.class);
-      put(4, SubjectSource.class);
-      put(11, NameSubType.class);
-    }
-  };
+  private final static Map <Integer, Class> FIRST_CORRELATION_HEADING_CLASS_MAP = new HashMap <>();
+
+  static {
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(1, T_BIB_HDR.class);
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(2, NameType.class);
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(17, NameType.class);
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(3, TitleFunction.class);
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(22, TitleFunction.class);
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(4, SubjectType.class);
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(18, SubjectType.class);
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(5, ControlNumberType.class);
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(19, ControlNumberType.class);
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(6, ClassificationType.class);
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(20, ClassificationType.class);
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(7, BibliographicNoteType.class);
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(8, BibliographicRelationType.class);
+    FIRST_CORRELATION_HEADING_CLASS_MAP.put(11, T_NME_TTL_FNCTN.class);
+  }
+
+  private final static Map <Integer, Class> SECOND_CORRELATION_CLASS_MAP = new HashMap <>();
+  static {
+    SECOND_CORRELATION_CLASS_MAP.put(2, NameSubType.class);
+    SECOND_CORRELATION_CLASS_MAP.put(3, TitleSecondaryFunction.class);
+    SECOND_CORRELATION_CLASS_MAP.put(4, SubjectFunction.class);
+    SECOND_CORRELATION_CLASS_MAP.put(5, ControlNumberFunction.class);
+    SECOND_CORRELATION_CLASS_MAP.put(6, ClassificationFunction.class);
+    SECOND_CORRELATION_CLASS_MAP.put(11, NameType.class);
+  }
+
+  private final static Map <Integer, Class> THIRD_CORRELATION_HEADING_CLASS_MAP = new HashMap <>();
+  static {
+    THIRD_CORRELATION_HEADING_CLASS_MAP.put(2, NameFunction.class);
+    THIRD_CORRELATION_HEADING_CLASS_MAP.put(4, SubjectSource.class);
+    THIRD_CORRELATION_HEADING_CLASS_MAP.put(11, NameSubType.class);
+  }
+
   private final Session session;
 
   /**
@@ -1363,7 +1364,9 @@ public class StorageService implements Closeable {
    * @param view       -- the search view.
    * @return the {@link BibliographicRecord} associated with the given data.
    */
-  public BibliographicRecord getBibliographicRecordById(final int itemNumber, final int view) {
+  public ContainerRecordTemplate getBibliographicRecordById(final int itemNumber, final int view) {
+
+    final ContainerRecordTemplate container = new ContainerRecordTemplate();
     CatalogItem item = null;
     try {
       item = getCatalogItemByKey(itemNumber, view);
@@ -1471,7 +1474,20 @@ public class StorageService implements Closeable {
       bibliographicRecord.getFields().add(field);
     });
 
-    return bibliographicRecord;
+    container.setBibliographicRecord(bibliographicRecord);
+    container.setRecordTemplate(ofNullable(item.getModelItem()).map(model -> {
+      try {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        final RecordTemplate template = objectMapper.readValue(model.getRecordFields(), RecordTemplate.class);
+        template.setId(model.getModel().getId());
+        return template;
+      } catch (IOException exception) {
+        logger.error(MessageCatalog._00013_IO_FAILURE, exception);
+        return null;
+      }
+    }).orElse(null));
+
+    return container;
   }
 
 
@@ -1629,6 +1645,45 @@ public class StorageService implements Closeable {
   }
 
   /**
+   * Gets category code using tag and indicators.
+   *
+   * @param tag -- the tag number.
+   * @param firstIndicator -- the 1.st indicator.
+   * @param secondIndicator -- the 2nd. indicator.
+   * @param hasTitle -- indicates if there is a title portion in tag value.
+   * @return category code.
+   * @throws DataAccessException -- in case of DataAccessException.
+   */
+  public int getTagCategory(final String tag,
+                            final char firstIndicator,
+                            final char secondIndicator,
+                            final boolean hasTitle) throws DataAccessException {
+    final BibliographicCorrelationDAO dao = new BibliographicCorrelationDAO();
+
+    try {
+      List<BibliographicCorrelation> correlations = dao.getCategoryCorrelation(session, tag, firstIndicator, secondIndicator);
+      if (correlations.size() == 1) {
+        return correlations.stream().filter(Objects::nonNull).findFirst().get().getKey().getMarcTagCategoryCode();
+      } else {
+        if (correlations.size() > 1) {
+          if ((tag.endsWith("00") || tag.endsWith("10") || tag.endsWith("11")) && hasTitle){
+            return GlobalStorage.NAME_TITLE_CATEGORY;
+          } else
+            if (correlations.stream().filter(Objects::nonNull).findFirst().isPresent())
+              return correlations.stream().filter(Objects::nonNull).findFirst().get().getKey().getMarcTagCategoryCode();
+        }
+      }
+
+      return 0;
+
+    } catch (final HibernateException exception) {
+      logger.error(MessageCatalog._00010_DATA_ACCESS_FAILURE, exception);
+      throw new DataAccessException(exception);
+    }
+  }
+
+
+  /**
    * Checks if record is new then execute insert or update.
    *
    * @param record             -- the bibliographic record to save.
@@ -1636,7 +1691,7 @@ public class StorageService implements Closeable {
    * @param generalInformation -- @linked GeneralInformation for default values.
    * @throws DataAccessException in case of data access exception.
    */
-  public void saveBibliographicRecord(final BibliographicRecord record, final int view, final GeneralInformation generalInformation, final String lang) throws DataAccessException {
+  public void saveBibliographicRecord(final BibliographicRecord record, final RecordTemplate template, final int view, final GeneralInformation generalInformation, final String lang) throws DataAccessException {
 
     CatalogItem item = null;
     try {
@@ -1645,16 +1700,35 @@ public class StorageService implements Closeable {
     }
 
     try {
+
       CasCache casCache = null;
-      if (item == null || item.getTags().size() == 0) {
+      if (item == null || item.getTags().isEmpty()) {
         item = insertBibliographicRecord(record, view, generalInformation, lang);
         casCache = new CasCache(item.getAmicusNumber());
         casCache.setLevelCard("L1");
         casCache.setStatusDisponibilit(99);
-
       } else {
         updateBibliographicRecord(record, item, view, generalInformation);
       }
+
+      item.setModelItem(
+        ofNullable(template).map(t ->{
+        final ObjectMapper mapper = new ObjectMapper();
+        final Model model = new BibliographicModel();
+
+        model.setId(t.getId());
+        model.setLabel(t.getName());
+        model.setFrbrFirstGroup(t.getGroup());
+        try {
+          String s = mapper.writeValueAsString(t);
+          logger.info(s);
+          model.setRecordFields(s);
+        } catch (JsonProcessingException e) {
+          logger.error(MessageCatalogStorage._00023_SAVE_TEMPLATE_ASSOCIATED_FAILURE, t.getId(), record.getId(), e);
+          throw new RuntimeException(e);
+        }
+        return model;
+      }).orElse(null));
 
       if (isNotNullOrEmpty(record.getVerificationLevel()))
         item.getItemEntity().setVerificationLevel(record.getVerificationLevel().charAt(0));
@@ -1757,7 +1831,7 @@ public class StorageService implements Closeable {
     final RecordParser recordParser = new RecordParser();
     final BibliographicCatalog catalog = new BibliographicCatalog();
     final int bibItemNumber = record.getId();
-    final CatalogItem item = catalog.newCatalogItem(new Object[]{new Integer(view), new Integer(bibItemNumber)});
+    final CatalogItem item = catalog.newCatalogItem(new Object[]{view, bibItemNumber});
 
     Leader leader = record.getLeader();
     item.getItemEntity().setLanguageOfCataloguing(lang);
