@@ -164,9 +164,9 @@ public abstract class CatalogDAO extends AbstractDAO {
 
     if (item.getModelItem() != null) {
       BibliographicModelItemDAO dao = new BibliographicModelItemDAO();
-      if(dao.getModelUsageByItem(item.getAmicusNumber(), session))
-        item.getModelItem().markChanged();
-      else
+      if(dao.getModelUsageByItem(item.getAmicusNumber(), session)) {
+        item.getModelItem().setUpdateStatus(UpdateStatus.CHANGED);
+      }else
         item.getModelItem().markNew();
 
       persistByStatus(item.getModelItem(), session);
