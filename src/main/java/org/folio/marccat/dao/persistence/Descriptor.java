@@ -4,6 +4,7 @@ import net.sf.hibernate.CallbackException;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Session;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.folio.marccat.business.cataloguing.common.SortFormObject;
 import org.folio.marccat.business.common.PersistenceState;
 import org.folio.marccat.business.common.PersistentObjectWithView;
 import org.folio.marccat.business.descriptor.MatchedHeadingInAnotherViewException;
@@ -24,7 +25,7 @@ import java.util.Map;
 /**
  * The base class for each descriptor.
  */
-public abstract class Descriptor implements PersistentObjectWithView {
+public abstract class Descriptor implements PersistentObjectWithView, SortFormObject {
 
   /**
    * The copy subject indicator.
