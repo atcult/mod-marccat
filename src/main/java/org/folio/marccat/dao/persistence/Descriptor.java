@@ -7,8 +7,10 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.folio.marccat.business.cataloguing.common.SortFormObject;
 import org.folio.marccat.business.common.PersistenceState;
 import org.folio.marccat.business.common.PersistentObjectWithView;
+import org.folio.marccat.business.common.SortFormException;
 import org.folio.marccat.business.descriptor.MatchedHeadingInAnotherViewException;
 import org.folio.marccat.business.descriptor.SortFormParameters;
+import org.folio.marccat.business.descriptor.SortformUtils;
 import org.folio.marccat.dao.DAODescriptor;
 import org.folio.marccat.dao.SystemNextNumberDAO;
 import org.folio.marccat.exception.*;
@@ -127,6 +129,15 @@ public abstract class Descriptor implements PersistentObjectWithView, SortFormOb
    */
   public void evict() throws DataAccessException {
     po.evict(this);
+  }
+
+  /**
+   *
+   * @throws SortFormException
+   */
+  @Override
+  public void calculateAndSetSortForm() throws SortFormException {
+    setSortForm(SortformUtils.defaultSortform(getStringText()));
   }
 
   /**

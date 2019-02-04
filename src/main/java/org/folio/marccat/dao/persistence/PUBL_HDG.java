@@ -1,6 +1,8 @@
 package org.folio.marccat.dao.persistence;
 
+import org.folio.marccat.business.common.SortFormException;
 import org.folio.marccat.business.descriptor.SortFormParameters;
+import org.folio.marccat.business.descriptor.SortformUtils;
 import org.folio.marccat.dao.AbstractDAO;
 import org.folio.marccat.dao.PublisherDescriptorDAO;
 import org.folio.marccat.exception.InvalidDescriptorException;
@@ -276,6 +278,20 @@ public class PUBL_HDG extends Descriptor implements Serializable {
       && !text.getSubfieldsWithCodes("a").isEmpty()))
       throw new MandatorySubfieldException("260", "b");
     super.validate();
+  }
+
+  @Override
+  public void calculateAndSetSortForm() throws SortFormException {
+    setNameSortForm(calculateNameSortForm());
+    setPlaceSortForm(calculatePlaceSortForm());
+  }
+
+  private String calculateNameSortForm() {
+    return SortformUtils.defaultSortform(getNameStringText());
+  }
+  private String calculatePlaceSortForm() {
+    return SortformUtils.defaultSortform(getPlaceStringText());
+
   }
 
   /* (non-Javadoc)

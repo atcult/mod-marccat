@@ -142,6 +142,18 @@ public class StringText implements Serializable {
   }
 
   /**
+   *
+   * @param klm index to be set
+   * @param subfield value to be set
+   * @return this StringText
+   */
+  public StringText setSubfield(int klm, Subfield subfield) {
+    this.subfieldList.set(klm, subfield);
+    return this;
+  }
+
+
+  /**
    * Gets the number of subfields.
    *
    * @return the number of subfields
