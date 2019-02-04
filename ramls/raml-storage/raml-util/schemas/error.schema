@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "An error",
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "code": {
+      "type": "string"
+    },
+    "parameters": {
+      "type": "object",
+      "$ref": "parameters.schema"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}

@@ -1,0 +1,18 @@
+configuration:
+  endpoint: http://151.1.165.20:8085/configurations/entries
+  zeta: 192.168.0.158
+  baseUrl: marccat
+
+logging:
+  level:
+    root: ERROR
+    org.springframework: ERROR
+    net.sf.hibernate: ERROR
+    net.sf.hibernate.SQL: DEBUG
+    net.sf.hibernate.type: TRACE
+    ru.yandex: ERROR
+    org.folio.marccat: INFO
+
+server:
+  port: 8080
+

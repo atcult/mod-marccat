@@ -1,0 +1,280 @@
+{
+  "logDtos": [
+    {
+      "jobExecutionId": "67dfac11-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "13414",
+      "jobProfileName": "Standard BIB profile",
+      "fileName": "import_1.mrc",
+      "runBy": {
+         "firstName": "Luke",
+         "lastName": "Mcdonald"
+      },
+      "completedDate": "2018-10-30T12:41:22.000"
+    },
+    {
+      "jobExecutionId": "klo09bvc-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "23112",
+      "jobProfileName": "BIB profile with customized Holdings",
+      "fileName": "import_2.mrc",
+      "runBy": {
+         "firstName": "Max",
+         "lastName": "Fraser"
+      },
+      "completedDate": "2018-10-30T12:42:18.000"
+    },
+    {
+      "jobExecutionId": "zx334gbn-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "33112",
+      "jobProfileName": "Christie's profile for CPL",
+      "fileName": "import_3.mrc",
+      "runBy": {
+         "firstName": "Ollie",
+         "lastName": "Rogers"
+      },
+      "completedDate": "2018-10-30T12:45:33.000"
+    },
+    {
+      "jobExecutionId": "qwsxcv44-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "47906",
+      "jobProfileName": "MIT Orders",
+      "fileName": "import_4.mrc",
+      "runBy": {
+         "firstName": "Patrick",
+         "lastName": "Griffiths"
+      },
+      "completedDate": "2018-11-01T10:12:51.000"
+    },
+    {
+      "jobExecutionId": "jj890npz-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "48906",
+      "jobProfileName": "Standard BIB profile with fixes for Items (HU)",
+      "fileName": "import_5.mrc",
+      "runBy": {
+         "firstName": "Zac",
+         "lastName": "White"
+      },
+      "completedDate": "2018-11-01T10:37:53.000"
+    },
+    {
+      "jobExecutionId": "ccvg6fgh-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "58906",
+      "jobProfileName": "Obsolete BIB profile for backward compatibility",
+      "fileName": "import_6.mrc",
+      "runBy": {
+         "firstName": "Marc",
+         "lastName": "Ruiz"
+      },
+      "completedDate": "2018-11-02T10:20:32.000"
+    },
+    {
+      "jobExecutionId": "erxdx46m-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "68551",
+      "jobProfileName": "New Holdings (Beta.2 Use carefully)",
+      "fileName": "import_7.mrc",
+      "runBy": {
+         "firstName": "Yehuda",
+         "lastName": "Sharp"
+      },
+      "completedDate": "2018-11-02T10:18:44.000"
+    },
+    {
+      "jobExecutionId": "77iklzd5-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "75671",
+      "jobProfileName": "Marc BIB-001 Jonathan test",
+      "fileName": "import_8.mrc",
+      "runBy": {
+         "firstName": "Callan",
+         "lastName": "Nunez"
+      },
+      "completedDate": "2018-11-01T10:09:51.000"
+    },
+    {
+      "jobExecutionId": "eefgbn89-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "81123",
+      "jobProfileName": "Standard BIB profile",
+      "fileName": "import_9.mrc",
+      "runBy": {
+         "firstName": "Riley",
+         "lastName": "Haynes"
+      },
+      "completedDate": "2018-11-01T10:18:42.000"
+    },
+    {
+      "jobExecutionId": "ggh890fg-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "91124",
+      "jobProfileName": "Standard BIB profile",
+      "fileName": "import_10.mrc",
+      "runBy": {
+         "firstName": "Jaylin",
+         "lastName": "Daniels"
+      },
+      "completedDate": "2018-11-01T11:08:21.000"
+    },
+    {
+      "jobExecutionId": "yty49kml-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "10556",
+      "jobProfileName": "Simple BIB profile (description update)",
+      "fileName": "import_11.mrc",
+      "runBy": {
+         "firstName": "Oscar",
+         "lastName": "Edwards"
+      },
+      "completedDate": "2018-11-02T12:09:51.000"
+    },
+    {
+      "jobExecutionId": "qqwedfv5-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "11250",
+      "jobProfileName": "Standard BIB profile (Instances only)",
+      "fileName": "import_12.mrc",
+      "runBy": {
+         "firstName": "Theo",
+         "lastName": "Newman"
+      },
+      "completedDate": "2018-11-03T10:01:30.000"
+    },
+    {
+      "jobExecutionId": "aazxc45f-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "52250",
+      "jobProfileName": "FOLIO Default",
+      "fileName": "import_13.mrc",
+      "runBy": {
+         "firstName": "Connor",
+         "lastName": "Simpson"
+      },
+      "completedDate": "2018-11-03T11:22:30.000"
+    },
+    {
+      "jobExecutionId": "12ffvb67-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "13250",
+      "jobProfileName": "Charlotte's Core Case with Fixes",
+      "fileName": "import_14.mrc",
+      "runBy": {
+         "firstName": "Dominic",
+         "lastName": "Nicholson"
+      },
+      "completedDate": "2018-11-02T09:05:30.000"
+    },
+    {
+      "jobExecutionId": "hkdorl60-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "14250",
+      "jobProfileName": "Pearson new data",
+      "fileName": "import_15.mrc",
+      "runBy": {
+         "firstName": "Oscar",
+         "lastName": "Butler"
+      },
+      "completedDate": "2018-11-03T11:45:21.000"
+    },
+    {
+      "jobExecutionId": "asdcvbnm-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "15150",
+      "jobProfileName": "Thomson Reuters standard",
+      "fileName": "import_16.mrc",
+      "runBy": {
+         "firstName": "Eli",
+         "lastName": "Dickerson"
+      },
+      "completedDate": "2018-11-02T10:45:21.000"
+    },
+    {
+      "jobExecutionId": "ghnm781a-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "16150",
+      "jobProfileName": "Standard BIB profile",
+      "fileName": "import_17.mrc",
+      "runBy": {
+         "firstName": "Adam",
+         "lastName": "Summers"
+      },
+      "completedDate": "2018-11-03T11:40:21.000"
+    },
+    {
+      "jobExecutionId": "rthn88mp-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "17091",
+      "jobProfileName": "Annual registry update profile",
+      "fileName": "import_18.mrc",
+      "runBy": {
+         "firstName": "Amir",
+         "lastName": "Cox"
+      },
+      "completedDate": "2018-11-03T14:20:21.000"
+    },
+    {
+      "jobExecutionId": "sdgbny65-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "18091",
+      "jobProfileName": "Outdated! DO NOT USE (Just Special Cases!)",
+      "fileName": "import_19.mrc",
+      "runBy": {
+         "firstName": "Kingston",
+         "lastName": "Forbes"
+      },
+      "completedDate": "2018-11-01T15:21:28.000"
+    },
+    {
+      "jobExecutionId": "qwcvbn67-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "18591",
+      "jobProfileName": "BIB profile with customized Holdings",
+      "fileName": "import_20.mrc",
+      "runBy": {
+         "firstName": "Jay",
+         "lastName": "Morrowitz"
+      },
+      "completedDate": "2018-11-05T13:08:12.000"
+    },
+    {
+      "jobExecutionId": "34thjn77-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "19091",
+      "jobProfileName": "BIB profile with new Holdings & Items",
+      "fileName": "import_21.mrc",
+      "runBy": {
+         "firstName": "Brandon",
+         "lastName": "Marshall"
+      },
+      "completedDate": "2018-11-01T19:01:41.000"
+    },
+    {
+      "jobExecutionId": "ascc56nm-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "20091",
+      "jobProfileName": "Standard BIB profile",
+      "fileName": "import_22.mrc",
+      "runBy": {
+         "firstName": "Elliot",
+         "lastName": "Lane"
+      },
+      "completedDate": "2018-11-05T14:21:57.000"
+    },
+    {
+      "jobExecutionId": "hjmkll87-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "21091",
+      "jobProfileName": "Marc bib jobs",
+      "fileName": "import_23.mrc",
+      "runBy": {
+         "firstName": "Jackson",
+         "lastName": "Adams"
+      },
+      "completedDate": "2018-11-05T08:59:55.000"
+    },
+    {
+      "jobExecutionId": "aaxcvf56-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "22091",
+      "jobProfileName": "New Holdings (Beta.2 Use carefully)",
+      "fileName": "import_24.mrc",
+      "runBy": {
+         "firstName": "Hayden",
+         "lastName": "Smith"
+      },
+      "completedDate": "2018-10-31T17:40:44.000"
+    },
+    {
+      "jobExecutionId": "g6nnmklo-1caf-4470-9ad1-d533f6360bdd",
+      "jobExecutionHrId": "23091",
+      "jobProfileName": "Standard BIB profile (2019 Q1 Beta test)",
+      "fileName": "import_25.mrc",
+      "runBy": {
+         "firstName": "Harry",
+         "lastName": "Riley"
+      },
+      "completedDate": "2018-10-31T15:33:35.000"
+    }
+  ],
+  "totalRecords": 25
+}
