@@ -1,6 +1,7 @@
 configuration:
   endpoint: http://151.1.165.20:8085/configurations/entries
-  zeta: 192.168.0.158
+  port: 8085
+  local: 151.1.165.20
   baseUrl: marccat
 
 logging:
@@ -15,4 +16,3 @@ logging:
 
 server:
   port: 8080
-

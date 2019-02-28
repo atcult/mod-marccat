@@ -1,5 +1,6 @@
 package org.folio.marccat.integration;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.folio.marccat.exception.DataAccessException;
 import org.folio.marccat.exception.SystemInternalFailureException;
@@ -15,6 +16,8 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
@@ -81,6 +84,7 @@ public abstract class MarccatHelper {
     }
   }
 
+
   /**
    * Executes a PUT request.
    *
@@ -90,14 +94,17 @@ public abstract class MarccatHelper {
    * @param validator         a validator function for the entity associated with this resource.
    * @param configurationSets the requested configuration attributes sets.
    */
-  public static <T> void doPut(
+  public static <T> ResponseEntity<T> doPut(
     final PieceOfExistingLogicAdapter<T> adapter,
     final String tenant,
     final Configuration configurator,
     final BooleanSupplier validator,
     final String... configurationSets) {
     if (validator.getAsBoolean()) {
-      exec(adapter, tenant, configurator, configurationSets);
+      final T result = exec(adapter, tenant, configurator, configurationSets);
+      final HttpHeaders headers = new HttpHeaders();
+      headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
+      return new ResponseEntity<>(result, headers, HttpStatus.CREATED);
     } else {
       throw new UnableToCreateOrUpdateEntityException();
     }
@@ -184,9 +191,9 @@ public abstract class MarccatHelper {
       .collect(toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
     return DataSourceBuilder
       .create()
-      .username("marccat")
-      .password("admin")
-      .url("jdbc:postgresql://192.168.0.158:5433/folio_marccat_sv2")
+      .username(config.get("user"))
+      .password(config.get("password"))
+      .url(config.get("url"))
       .build();
   }
 

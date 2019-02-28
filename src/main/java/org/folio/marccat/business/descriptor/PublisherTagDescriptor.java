@@ -12,9 +12,6 @@ import java.util.List;
 
 /**
  * An adaptor to implement Descriptor semantics for the set of PUBL_TAG objects representing this Publisher APF.
- *
- * @author paul
- * @author natasciab
  */
 public class PublisherTagDescriptor extends Descriptor {
   private static final long serialVersionUID = 1L;
@@ -68,6 +65,16 @@ public class PublisherTagDescriptor extends Descriptor {
   @Override
   public SortFormParameters getSortFormParameters() {
     return null;
+  }
+
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return super.equals(obj);
   }
 
   public AbstractDAO getDAO() {

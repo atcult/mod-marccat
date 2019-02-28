@@ -5,17 +5,15 @@ import org.folio.marccat.exception.DataAccessException;
 import org.folio.marccat.util.StringText;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 import java.util.Collections;
 import java.util.List;
+
 import static java.util.Optional.ofNullable;
 
 
 /**
  * Manages the variable tag field.
- *
- * @author paulm
- * @author nbianchini
- * @since 1.0
  */
 public abstract class VariableField extends Tag {
 
@@ -55,7 +53,7 @@ public abstract class VariableField extends Tag {
    * @return null.
    * @throws DataAccessException in case of data access exception.
    */
-  public List getSecondCorrelationList(final int value1) throws DataAccessException {
+  public List getSecondCorrelationList(final int value1) {
     return Collections.emptyList();
   }
 
@@ -67,7 +65,7 @@ public abstract class VariableField extends Tag {
    * @return null.
    * @throws DataAccessException in case of data access exception.
    */
-  public List getThirdCorrelationList(final int value1, final int value2) throws DataAccessException {
+  public List getThirdCorrelationList(final int value1, final int value2) {
     return Collections.emptyList();
   }
 
@@ -137,9 +135,7 @@ public abstract class VariableField extends Tag {
    * @return an element content.
    */
   public Element generateModelXmlElementContent(final Document xmlDocument) {
-    return ofNullable(xmlDocument).map(content -> {
-      return getStringText().generateModelXmlElementContent(xmlDocument);
-    }).orElse(null);
+    return ofNullable(xmlDocument).map(content -> getStringText().generateModelXmlElementContent(xmlDocument)).orElse(null);
   }
 
   /**
@@ -167,7 +163,7 @@ public abstract class VariableField extends Tag {
    * @throws Exception the exception
    */
   @Override
-  public StringText addPunctuation()throws Exception{
+  public StringText addPunctuation() throws Exception {
     return getStringText();
   }
 

@@ -20,7 +20,12 @@ public class FixedFieldElement {
   private String dafaultValue;
 
   @JsonProperty("dropdownSelect")
-  private List dropdownSelect = new ArrayList<Pair>();
+  private List<?> dropdownSelect = new ArrayList<Pair>();
+
+  public FixedFieldElement(String name, List dropdownSelect) {
+    this.name = name;
+    this.dropdownSelect = dropdownSelect;
+  }
 
   public String getName() {
     return name;
@@ -43,11 +48,6 @@ public class FixedFieldElement {
   }
 
   public void setDropdownSelect(List dropdownSelect) {
-    this.dropdownSelect = dropdownSelect;
-  }
-
-  public FixedFieldElement (String name, List dropdownSelect) {
-    this.name = name;
     this.dropdownSelect = dropdownSelect;
   }
 

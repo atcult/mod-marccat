@@ -19,7 +19,14 @@ import java.util.List;
  */
 public class AutDAO extends AbstractDAO {
 
-
+  /**
+   * return a authority record
+   *
+   * @param session
+   * @param id
+   * @return
+   * @throws DataAccessException
+   */
   public AUT load(final Session session, final int id) throws HibernateException {
     AUT itm = (AUT) session.get(AUT.class, new Integer(id));
     if (itm == null) {

@@ -4,10 +4,13 @@ import net.sf.hibernate.CallbackException;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Session;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.folio.marccat.business.cataloguing.common.SortFormObject;
 import org.folio.marccat.business.common.PersistenceState;
 import org.folio.marccat.business.common.PersistentObjectWithView;
+import org.folio.marccat.business.common.SortFormException;
 import org.folio.marccat.business.descriptor.MatchedHeadingInAnotherViewException;
 import org.folio.marccat.business.descriptor.SortFormParameters;
+import org.folio.marccat.business.descriptor.SortformUtils;
 import org.folio.marccat.dao.DAODescriptor;
 import org.folio.marccat.dao.SystemNextNumberDAO;
 import org.folio.marccat.exception.*;
@@ -20,11 +23,13 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
 
+import static org.folio.marccat.config.Global.EMPTY_STRING;
+
 
 /**
  * The base class for each descriptor.
  */
-public abstract class Descriptor implements PersistentObjectWithView {
+public abstract class Descriptor implements PersistentObjectWithView, SortFormObject {
 
   /**
    * The copy subject indicator.
@@ -97,8 +102,16 @@ public abstract class Descriptor implements PersistentObjectWithView {
   public Descriptor() {
     setKey(new DescriptorKey());
     StringText s = new StringText();
-    s.addSubfield(new Subfield("a", ""));
+    s.addSubfield(new Subfield("a", EMPTY_STRING));
     setStringText(s.toString());
+  }
+
+  /**
+   * @throws SortFormException
+   */
+  @Override
+  public void calculateAndSetSortForm() throws SortFormException {
+    setSortForm(SortformUtils.get().defaultSortform(getStringText()));
   }
 
   /**
@@ -318,7 +331,7 @@ public abstract class Descriptor implements PersistentObjectWithView {
    * @param string sortForm
    */
   public void setSortForm(String string) {
-    sortForm = string;
+    this.sortForm = string;
   }
 
   /**
@@ -717,7 +730,7 @@ public abstract class Descriptor implements PersistentObjectWithView {
     Iterator iter = st.getSubfieldList().iterator();
     while (iter.hasNext()) {
       Subfield s = (Subfield) iter.next();
-      if (s.getContent() == null || "".equals(s.getContent())) {
+      if (s.getContent() == null || EMPTY_STRING.equals(s.getContent())) {
         throw new DescriptorHasEmptySubfieldsException();
       }
     }

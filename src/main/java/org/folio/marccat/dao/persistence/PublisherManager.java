@@ -15,11 +15,14 @@ import org.folio.marccat.model.Subfield;
 import org.folio.marccat.shared.CorrelationValues;
 import org.folio.marccat.util.F;
 import org.folio.marccat.util.StringText;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
+
 import static java.util.Optional.ofNullable;
+import static org.folio.marccat.config.Global.EMPTY_STRING;
 
 
 /**
@@ -34,37 +37,59 @@ import static java.util.Optional.ofNullable;
 @SuppressWarnings("unchecked")
 public class PublisherManager extends VariableField implements PersistentObjectWithView {
 
-  /** The Constant serialVersionUID. */
+  /**
+   * The Constant serialVersionUID.
+   */
   private static final long serialVersionUID = 1L;
 
-  /** The Constant daoPublisherTag. */
+  /**
+   * The Constant daoPublisherTag.
+   */
   private static final PublisherManagerDAO daoPublisherTag = new PublisherManagerDAO();
 
-  /** The persistence state. */
+  /**
+   * The persistence state.
+   */
   private PersistenceState persistenceState = new PersistenceState();
 
-  /** The publisher tag units. */
+  /**
+   * The publisher tag units.
+   */
   private List<PUBL_TAG> publisherTagUnits = new ArrayList<>();
 
-  /** The deleted units. */
+  /**
+   * The deleted units.
+   */
   private List<PUBL_TAG> deletedUnits = new ArrayList<>();
 
-  /** The apf. */
+  /**
+   * The apf.
+   */
   private PublisherAccessPoint apf = new PublisherAccessPoint();
 
-  /** The dates. */
+  /**
+   * The dates.
+   */
   private List<String> dates = new ArrayList<>();
 
-  /** The tag unit index. */
+  /**
+   * The tag unit index.
+   */
   private int tagUnitIndex;
 
-  /** The user view helper. */
+  /**
+   * The user view helper.
+   */
   private UserViewHelper userViewHelper = new UserViewHelper();
 
-  /** The string text for fast digit publisher. */
+  /**
+   * The string text for fast digit publisher.
+   */
   private String stringTextForFastDigitPublisher;
 
-  /** The note type. */
+  /**
+   * The note type.
+   */
   private int noteType;
 
   /**
@@ -106,7 +131,7 @@ public class PublisherManager extends VariableField implements PersistentObjectW
     setUserViewString(apf.getUserViewString());
     setUpdateStatus(apf.getUpdateStatus());
     setApf(apf);
-    getDates().add("");
+    getDates().add(EMPTY_STRING);
     setPublisherTagUnits(((PublisherTagDescriptor) getApf().getDescriptor()).getPublisherTagUnits());
     getPublisherTagUnits().sort(new PublisherTagComparator());
     setNoteType(Global.PUBLISHER_DEFAULT_NOTE_TYPE);
@@ -385,7 +410,7 @@ public class PublisherManager extends VariableField implements PersistentObjectW
     final PUBL_TAG tagUnit = new PUBL_TAG();
     tagUnit.setUserViewString(getUserViewString());
     getPublisherTagUnits().add(tagUnit);
-    getDates().add("");
+    getDates().add(EMPTY_STRING);
   }
 
   /**
@@ -406,12 +431,12 @@ public class PublisherManager extends VariableField implements PersistentObjectW
         final PUBL_TAG publTag = getPublisherTagUnits().get(idx);
         final PUBL_HDG publUnit = publTag.getDescriptor();
         if (publUnit != null && publUnit.getKey().getHeadingNumber() == -1) {
-          publUnit.setNameStringText("");
-          publUnit.setPlaceStringText("");
+          publUnit.setNameStringText(EMPTY_STRING);
+          publUnit.setPlaceStringText(EMPTY_STRING);
         }
         publTag.setSequenceNumber(idx + 1);
-        String date = "";
-        if (!"".equals(getDates().get(idx)))
+        String date = EMPTY_STRING;
+        if (!EMPTY_STRING.equals(getDates().get(idx)))
           date = Subfield.SUBFIELD_DELIMITER + "c" + getDates().get(idx);
 
         publTag.setOtherSubfields(date);
@@ -582,8 +607,8 @@ public class PublisherManager extends VariableField implements PersistentObjectW
   private void detachDescriptor(final PUBL_TAG tagUnit) {
     final PUBL_HDG publisherHeading = tagUnit.getDescriptor();
     if (tagUnit.getPublisherHeadingNumber() == null) {
-      publisherHeading.setNameStringText("");
-      publisherHeading.setPlaceStringText("");
+      publisherHeading.setNameStringText(EMPTY_STRING);
+      publisherHeading.setPlaceStringText(EMPTY_STRING);
 
     } else {
       tagUnit.setDescriptor(null);
@@ -598,47 +623,41 @@ public class PublisherManager extends VariableField implements PersistentObjectW
    * @throws Exception the exception
    */
   @Override
-  public StringText addPunctuation() throws Exception{
+  public StringText addPunctuation() throws Exception {
     final StringText result = new StringText(getStringText().toString());
-    try{
-    int subfieldIndex = 0;
-    for (Object o : result.getSubfieldList()) {
-      Subfield s = (Subfield)o;
-      if (s.getCode().equals("a") || s.getCode().equals("b")) {
-        if (subfieldIndex < result.getNumberOfSubfields() - 1) {
-          if (result.getSubfield(subfieldIndex + 1).getCode().equals("a")) {
-            s.setContent(s.getContent() + " ;");
+    try {
+      int subfieldIndex = 0;
+      for (Object o : result.getSubfieldList()) {
+        Subfield s = (Subfield) o;
+        if (s.getCode().equals("a") || s.getCode().equals("b")) {
+          if (subfieldIndex < result.getNumberOfSubfields() - 1) {
+            if (result.getSubfield(subfieldIndex + 1).getCode().equals("a")) {
+              s.setContent(s.getContent() + " ;");
+            } else if (result.getSubfield(subfieldIndex + 1).getCode().equals("b")) {
+              s.setContent(s.getContent() + " :");
+            } else if (result.getSubfield(subfieldIndex + 1).getCode().equals("c")) {
+              s.setContent(s.getContent() + ",");
+            }
           }
-          else if (result.getSubfield(subfieldIndex + 1).getCode().equals("b")) {
-            s.setContent(s.getContent() + " :");
-          }
-          else if (result.getSubfield(subfieldIndex + 1).getCode().equals("c")) {
-            s.setContent(s.getContent() + ",");
-          }
-        }
-      }
-      else if (s.getCode().equals("c")) {
-        if (subfieldIndex == result.getNumberOfSubfields() - 1 &&
-          !"-])".contains(""+s.getContent().charAt(s.getContentLength() - 1))) {
+        } else if (s.getCode().equals("c")) {
+          if (subfieldIndex == result.getNumberOfSubfields() - 1 &&
+            !"-])".contains(EMPTY_STRING + s.getContent().charAt(s.getContentLength() - 1))) {
             s.setContent(s.getContent() + ".");
-         }
-      }
-      else if (s.getCode().equals("e") || s.getCode().equals("f")) {
-        if (subfieldIndex < result.getNumberOfSubfields() - 1) {
-          if (result.getSubfield(subfieldIndex+1).getCode().equals("e")) {
-            s.setContent(s.getContent() + ";");
           }
-          else if (result.getSubfield(subfieldIndex + 1).getCode().equals("f")) {
-            s.setContent(s.getContent() + " :");
-          }
-          else if (result.getSubfield(subfieldIndex + 1).getCode().equals("g")) {
-            s.setContent(s.getContent() + ",");
+        } else if (s.getCode().equals("e") || s.getCode().equals("f")) {
+          if (subfieldIndex < result.getNumberOfSubfields() - 1) {
+            if (result.getSubfield(subfieldIndex + 1).getCode().equals("e")) {
+              s.setContent(s.getContent() + ";");
+            } else if (result.getSubfield(subfieldIndex + 1).getCode().equals("f")) {
+              s.setContent(s.getContent() + " :");
+            } else if (result.getSubfield(subfieldIndex + 1).getCode().equals("g")) {
+              s.setContent(s.getContent() + ",");
+            }
           }
         }
+        subfieldIndex++;
       }
-      subfieldIndex++;
-    }
-    return result;
+      return result;
     } catch (Exception e) {
       return result;
     }

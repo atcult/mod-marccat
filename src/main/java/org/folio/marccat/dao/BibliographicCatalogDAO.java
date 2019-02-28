@@ -10,7 +10,6 @@ import org.folio.marccat.business.cataloguing.bibliographic.BibliographicTagImpl
 import org.folio.marccat.business.cataloguing.bibliographic.PersistsViaItem;
 import org.folio.marccat.business.cataloguing.common.Tag;
 import org.folio.marccat.business.common.PersistentObjectWithView;
-import org.folio.marccat.business.common.View;
 import org.folio.marccat.business.controller.UserProfile;
 import org.folio.marccat.config.Global;
 import org.folio.marccat.config.log.Log;
@@ -33,12 +32,6 @@ import java.util.stream.Collectors;
 
 import static org.folio.marccat.util.F.isNotNullOrEmpty;
 
-/**
- * Class for data access bibliographic item.
- *
- * @author natasciab
- * @since 1.0
- */
 
 public class BibliographicCatalogDAO extends CatalogDAO {
   private Log logger = new Log(BibliographicCatalogDAO.class);
@@ -79,7 +72,12 @@ public class BibliographicCatalogDAO extends CatalogDAO {
     updateFullRecordCacheTable(session, item, true);
   }
 
-  // 2018 Paul Search Engine Java
+  /**
+   * @param session
+   * @param item
+   * @param updateRelatedRecs
+   * @throws HibernateException
+   */
   private void updateFullRecordCacheTable(final Session session, final CatalogItem item, final boolean updateRelatedRecs) throws HibernateException {
     FULL_CACHE cache;
     DAOFullCache dao = new DAOFullCache();
@@ -90,8 +88,8 @@ public class BibliographicCatalogDAO extends CatalogDAO {
       cache.setItemNumber(item.getAmicusNumber());
       cache.setUserView(item.getUserView());
     }
-    item.sortTags();
-    cache.setRecordData(XmlUtils.documentToString(item.toExternalMarcSlim()));
+    //item.sortTags();
+    cache.setRecordData(XmlUtils.documentToString(item.toExternalMarcSlim(session)));
     cache.markChanged();
     persistByStatus(cache, session);
     session.evict(cache);
@@ -258,7 +256,7 @@ public class BibliographicCatalogDAO extends CatalogDAO {
   @SuppressWarnings("unchecked")
   private List<MaterialDescription> getMaterialDescriptions(final int amicusNumber, final int userView, final Session session) throws HibernateException {
 
-    List<MaterialDescription> multiView = session.find("from MaterialDescription t "
+    final List<MaterialDescription> multiView = session.find("from MaterialDescription t "
         + "where t.bibItemNumber = ? and substr(t.userViewString, ?, 1) = '1' ",
       new Object[]{amicusNumber, userView},
       new Type[]{Hibernate.INTEGER, Hibernate.INTEGER});
@@ -406,13 +404,16 @@ public class BibliographicCatalogDAO extends CatalogDAO {
    * @throws HibernateException in case of hibernate exception.
    */
   @SuppressWarnings("unchecked")
-  private List<NameTitleAccessPoint> getNameTitleAccessPointTags(final int amicusNumber, final int userView, final Session session) throws HibernateException {
+  private List<NameTitleAccessPoint> getNameTitleAccessPointTags(final int amicusNumber, final int userView, final Session session) throws HibernateException, DataAccessException {
     List<NameTitleAccessPoint> result = (List<NameTitleAccessPoint>) getAccessPointTags(NameTitleAccessPoint.class, amicusNumber, userView, session);
     return result.stream().map(tag -> {
       final NME_TTL_HDG hdg = (NME_TTL_HDG) tag.getDescriptor();
-      //Done by Carmen in branch 73 //TODO after merge remove comments
-      //TODO hdg.setNameHeading((NME_HDG) new DAONameDescriptor().load(hdg.getNameHeadingNumber(), userView, session)); //TODO: session missing
-      //TODO hdg.setTitleHeading((TTL_HDG) new DAOTitleDescriptor().load(hdg.getTitleHeadingNumber(), userView, session)); //TODO: session missing
+      try {
+        hdg.setNameHeading((NME_HDG) new NameDescriptorDAO().load(hdg.getNameHeadingNumber(), userView, session));
+        hdg.setTitleHeading((TTL_HDG) new TitleDescriptorDAO().load(hdg.getTitleHeadingNumber(), userView, session));
+      }  catch (HibernateException e) {
+        throw new DataAccessException(String.format(MessageCatalog._00016_NO_HEADING_FOUND, tag.getHeadingNumber()));
+      }
       return tag;
     }).collect(Collectors.toList());
   }
@@ -506,26 +507,30 @@ public class BibliographicCatalogDAO extends CatalogDAO {
    *
    * @param bibItemNumber   -- the bibliographic item number.
    * @param cataloguingView -- marccat view associated.
+   * @param uniformTitleSortForm -- the uniforme title sort form.
+   * @param titleSortForm -- the title sort form.
    * @param session         -- the current session hibernate.
    * @throws HibernateException in case of hibernate exception.
    */
-  public void updateItemDisplayCacheTable(final int bibItemNumber, final int cataloguingView, final Session session) throws HibernateException {
+  public void updateItemDisplayCacheTable(final int bibItemNumber, final int cataloguingView, final String uniformTitleSortForm ,
+                                          final String titleSortForm , final Session session) throws HibernateException {
     final Transaction transaction = getTransaction(session);
 
     CallableStatement proc = null;
     try {
-      String result = null;
+      String result;
       Connection connection = session.connection();
-      proc = connection.prepareCall("{call AMICUS.CFN_PR_CACHE_UPDATE(?, cast(? as smallint), ?, ?) }");
+      proc = connection.prepareCall("{call AMICUS.CFN_PR_CACHE_UPDATE(?, cast(? as smallint), ?, ?, ?, ?) }");
       proc.setInt(1, bibItemNumber);
       proc.setInt(2, cataloguingView);
       proc.setInt(3, -1);
-      proc.registerOutParameter(4, Types.VARCHAR);
+      proc.setString(4, uniformTitleSortForm);
+      proc.setString(5, titleSortForm);
+      proc.registerOutParameter(6, Types.VARCHAR);
       proc.execute();
-      result = proc.getString(4);
+      result = proc.getString(6);
       if (!result.equals("0")) {
         cleanUp(transaction);
-        //logger.error(MessageCatalog._00011_CACHE_UPDATE_FAILURE, result);
         throw new CacheUpdateException();
       }
       transaction.commit();
@@ -549,12 +554,35 @@ public class BibliographicCatalogDAO extends CatalogDAO {
    * @throws DataAccessException
    */
   protected void updateItemDisplayCacheTable(final CatalogItem item, final Session session)
-    throws DataAccessException {
-    try {
-      updateItemDisplayCacheTable(item.getAmicusNumber(), item.getUserView(), session);
+    throws DataAccessException, HibernateException {
+      final Tag tag130 = item.findFirstTagByNumber("130", session);
+      final Tag tag245 = item.findFirstTagByNumber("245", session);
+      String uniformTitleSortForm = "";
+      String titleSortForm = "";
+      if(tag130 != null) {
+        uniformTitleSortForm = getTitleSortForm((TitleAccessPoint) tag130);
+      }
+       if(tag245 != null) {
+        titleSortForm = getTitleSortForm((TitleAccessPoint) tag245);
+      }
+      updateItemDisplayCacheTable(item.getAmicusNumber(), item.getUserView(), uniformTitleSortForm, titleSortForm, session);
       updateFullRecordCacheTable(session, item);
-    } catch (Exception e) {
-    }
+  }
+
+  /**
+   * Return the sort form for the title access point
+   *
+   * @param tag
+   * @return the sort form for the title access point
+   */
+   private String getTitleSortForm(AccessPoint tag) {
+    String uniformTitleSortForm;
+    String accessPoint = tag.getAccessPointStringText().toDisplayString();
+    TTL_HDG title = new TTL_HDG();
+    title.setStringText("\u001fc" +accessPoint);
+    title.calculateAndSetSortForm();
+    uniformTitleSortForm = title.getSortForm();
+    return uniformTitleSortForm;
   }
 
   //TODO: maybe can be removed
@@ -578,42 +606,6 @@ public class BibliographicCatalogDAO extends CatalogDAO {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  private void transferPublisherItems(final Descriptor source, final Descriptor target, final Session session) throws HibernateException {
-    final Transaction transaction = getTransaction(session);
-    try {
-      int cataloguingView = View.toIntView(source.getUserViewString());
-
-      List<PUBL_TAG> raw = session.find("from  PUBL_TAG as tag "
-          + " where  "
-          + " tag.publisherHeadingNumber=?"
-          + " and substr(tag.userViewString, ?, 1) = '1'",
-        new Object[]{source.getKey().getHeadingNumber(), cataloguingView},
-        new Type[]{Hibernate.INTEGER, Hibernate.INTEGER});
-
-      List<PUBL_TAG> singleViewList = (List<PUBL_TAG>) isolateViewForList(raw, cataloguingView, session);
-      singleViewList.forEach(anAPF -> {
-        try {
-          anAPF.markChanged();
-          anAPF.setPublisherHeadingNumber(target.getKey().getHeadingNumber());
-          persistByStatus(anAPF, session);
-        } catch (HibernateException e) {
-          throw new RuntimeException(e);
-        }
-      });
-      transaction.commit();
-    } catch (Exception e) {
-      cleanUp(transaction);
-      logger.error(MessageCatalog._00010_DATA_ACCESS_FAILURE, e);
-      throw new HibernateException(e);
-    }
-
-    if (target.changeAffectsCacheTable()) {
-      ((DAODescriptor) target.getDAO()).updateCacheTable(target, session);
-    }
-  }
-
-
   @Deprecated
   public Collection<SubjectAccessPoint> getEquivalentSubjects(final CatalogItem item) throws DataAccessException {
     return Collections.emptyList();
@@ -625,28 +617,7 @@ public class BibliographicCatalogDAO extends CatalogDAO {
     return publisherAccessPoints.stream().map(accessPoint -> new PublisherManager(accessPoint)).collect(Collectors.toList());
   }
 
-  /**
-   * Check function for transferring from descriptor to another.
-   *
-   * @param source -- the source descriptor.
-   * @param target -- the target descriptor.
-   */
-  private void transferChecks(final Descriptor source, final Descriptor target) {
-    if (target == null) {
-      //logger.error(MessageCatalog._00012_TARGET_DESCRIPTOR_NULL);
-      throw new IllegalArgumentException();
-    }
 
-    if (source.getClass() != target.getClass()) {
-      //logger.error(MessageCatalog._00013_DIFFERENT_TARGET_SOURCE);
-      throw new IllegalArgumentException();
-    }
-  }
-
-
-  /* (non-Javadoc)
-   * @see CatalogDAO#getCatalogItemByKey(java.lang.Object[])
-   */
   @Deprecated
   public CatalogItem getCatalogItemByKey(Object[] key)
     throws DataAccessException {
@@ -654,10 +625,7 @@ public class BibliographicCatalogDAO extends CatalogDAO {
   }
 
   @Deprecated
-  public BibliographicItem getBibliographicItemWithoutRelationships(final int id,
-                                                                    int userView)
-    throws DataAccessException {
-
+  public BibliographicItem getBibliographicItemWithoutRelationships(final int id, int userView) throws DataAccessException {
     return null;
   }
 

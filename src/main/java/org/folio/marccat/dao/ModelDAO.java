@@ -9,7 +9,6 @@ import org.folio.marccat.business.codetable.Avp;
 import org.folio.marccat.dao.persistence.Model;
 
 import java.util.List;
-import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
 
@@ -80,7 +79,7 @@ public abstract class ModelDAO extends AbstractDAO {
         + " as itm where itm.id = ? ",
       new Object[]{id},
       new Type[]{Hibernate.INTEGER});
-    return list.stream().filter(Objects::nonNull).findFirst().orElse(null);
+    return list.size() > 0 ? list.get(0) : null;
   }
 
 

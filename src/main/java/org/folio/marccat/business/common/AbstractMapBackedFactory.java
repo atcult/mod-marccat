@@ -6,9 +6,6 @@ import static java.util.Optional.ofNullable;
 
 /**
  * Supertype layer for all map-backed object factories.
- *
- * @author paulm
- * @since 1.0
  */
 public abstract class AbstractMapBackedFactory {
   /**
@@ -50,7 +47,7 @@ public abstract class AbstractMapBackedFactory {
       try {
         return clazz.newInstance();
       } catch (final Exception exception) {
-        throw new RuntimeException(exception);
+        throw new IllegalArgumentException(exception);
       }
     }).orElseThrow(() -> new RuntimeException("Unable to create a valid instance of " + type));
   }

@@ -9,6 +9,8 @@ import org.folio.marccat.util.F;
 import java.util.Map;
 
 import static java.util.Optional.ofNullable;
+import static org.folio.marccat.resources.shared.FixeFieldUtils.isFixedField;
+import static org.folio.marccat.resources.shared.RecordUtils.getLeaderValue;
 
 public interface CatalogingInformation {
 
@@ -29,13 +31,13 @@ public interface CatalogingInformation {
    * @param lang           the lang associated with the current request.
    * @return a fixed-field containing all selected values.
    */
-   static FixedField getFixedField(final StorageService storageService,
-                                   final int headerTypeCode,
-                                   final String code,
-                                   final String leader,
-                                   String valueField,
-                                   final String lang,
-                                   final Map<String, String> serviceConfiguration) {
+  static FixedField getFixedField(final StorageService storageService,
+                                  final int headerTypeCode,
+                                  final String code,
+                                  final String leader,
+                                  String valueField,
+                                  final String lang,
+                                  final Map<String, String> serviceConfiguration) {
 
 
     FixedField fixedField = null;
@@ -49,14 +51,14 @@ public interface CatalogingInformation {
 
       GeneralInformation generalInformation = null;
 
-      switch(code) {
-        case Global.LEADER_TAG_NUMBER :
+      switch (code) {
+        case Global.LEADER_TAG_NUMBER:
           final String description = storageService.getHeadingTypeDescription(headerTypeCode, lang, Global.INT_CATEGORY);
           fixedField.setDescription(description);
           fixedField.setDisplayValue(ofNullable(valueField).orElse(getLeaderValue()));
           setLeaderValues(fixedField);
           break;
-        case Global.MATERIAL_TAG_CODE :
+        case Global.MATERIAL_TAG_CODE:
           generalInformation = new GeneralInformation();
           generalInformation.setDefaultValues(serviceConfiguration);
           final Map<String, Object> mapRecordTypeMaterialLeader = storageService.getMaterialTypeInfosByLeaderValues(leader.charAt(6), leader.charAt(7), code);
@@ -72,7 +74,7 @@ public interface CatalogingInformation {
           }
           break;
 
-        case Global.OTHER_MATERIAL_TAG_CODE :
+        case Global.OTHER_MATERIAL_TAG_CODE:
           generalInformation = new GeneralInformation();
           generalInformation.setDefaultValues(serviceConfiguration);
 
@@ -82,7 +84,7 @@ public interface CatalogingInformation {
           generalInformation.setFormOfMaterial((String) mapRecordTypeMaterialHeader.get(Global.FORM_OF_MATERIAL_LABEL));
           generalInformation.setMaterialDescription008Indicator("0");
           break;
-        case Global.PHYSICAL_DESCRIPTION_TAG_CODE :
+        case Global.PHYSICAL_DESCRIPTION_TAG_CODE:
           final String categoryOfMaterial = ofNullable(Global.PHYSICAL_TYPES_MAP.get(headerTypeCode)).orElse(Global.UNSPECIFIED);
           fixedField.setHeaderTypeCode((categoryOfMaterial.equals(Global.UNSPECIFIED)) ? Global.PHYSICAL_UNSPECIFIED_HEADER_TYPE : headerTypeCode);
           fixedField.setDescription(storageService.getHeadingTypeDescription(fixedField.getHeaderTypeCode(), lang, Global.INT_CATEGORY));
@@ -91,41 +93,31 @@ public interface CatalogingInformation {
           setPhysicalInformationValues(fixedField, valueField);
           break;
 
-        case Global.DATETIME_TRANSACTION_TAG_CODE :
+        case Global.DATETIME_TRANSACTION_TAG_CODE:
           fixedField.setDescription(storageService.getHeadingTypeDescription(
             headerTypeCode, lang, Global.INT_CATEGORY));
           fixedField.setDisplayValue(F.getFormattedToday("yyyyMMddHHmmss."));
           break;
 
-        default :
+        default:
       }
 
       if ((code.equals(Global.MATERIAL_TAG_CODE) || code.equals(Global.OTHER_MATERIAL_TAG_CODE)) && generalInformation != null) {
-          if (valueField == null) {
-            if ("1".equals(generalInformation.getMaterialDescription008Indicator())) {
-              generalInformation.setEnteredOnFileDateYYMMDD(F.getFormattedToday("yyMMdd"));
-            }
-            valueField = generalInformation.getValueString();
+        if (valueField == null) {
+          if ("1".equals(generalInformation.getMaterialDescription008Indicator())) {
+            generalInformation.setEnteredOnFileDateYYMMDD(F.getFormattedToday("yyMMdd"));
           }
+          valueField = generalInformation.getValueString();
+        }
 
-          fixedField.setHeaderTypeCode(generalInformation.getHeaderType());
-          fixedField.setDescription(storageService.getHeadingTypeDescription(generalInformation.getHeaderType(), lang, Global.INT_CATEGORY));
-          fixedField.setDisplayValue(valueField);
-          setMaterialValues(fixedField, generalInformation);
+        fixedField.setHeaderTypeCode(generalInformation.getHeaderType());
+        fixedField.setDescription(storageService.getHeadingTypeDescription(generalInformation.getHeaderType(), lang, Global.INT_CATEGORY));
+        fixedField.setDisplayValue(valueField);
+        setMaterialValues(fixedField, generalInformation);
       }
     }
 
     return fixedField;
-  }
-
-  /**
-   * Check if is a fixedField or not.
-   *
-   * @param code the tag number code.
-   * @return true if is fixedfield, false otherwise.
-   */
-  static boolean isFixedField(final String code) {
-    return Global.FIXED_FIELDS.contains(code);
   }
 
 
@@ -143,27 +135,6 @@ public interface CatalogingInformation {
   }
 
   /**
-   * Sets default leader value.
-   *
-   * @return a leader value.
-   */
-  static String getLeaderValue() {
-    return new StringBuilder(Global.FIXED_LEADER_LENGTH)
-      .append(Global.RECORD_STATUS_CODE)
-      .append(Global.RECORD_TYPE_CODE)
-      .append(Global.BIBLIOGRAPHIC_LEVEL_CODE)
-      .append(Global.CONTROL_TYPE_CODE)
-      .append(Global.CHARACTER_CODING_SCHEME_CODE)
-      .append(Global.FIXED_LEADER_BASE_ADDRESS)
-      .append(Global.ENCODING_LEVEL)
-      .append(Global.DESCRIPTIVE_CATALOGUING_CODE)
-      .append(Global.LINKED_RECORD_CODE)
-      .append(Global.FIXED_LEADER_PORTION)
-      .toString();
-  }
-
-
-  /**
    * Inject leader values for drop-down list selected.
    *
    * @param fixedField the fixedField to populate.
@@ -171,7 +142,7 @@ public interface CatalogingInformation {
   static void setLeaderValues(final FixedField fixedField) {
 
     final String leaderValue = fixedField.getDisplayValue().length() != Global.LEADER_LENGTH
-      ? CatalogingInformation.getLeaderValue()
+      ? getLeaderValue()
       : fixedField.getDisplayValue();
 
     fixedField.setDisplayValue(leaderValue);
