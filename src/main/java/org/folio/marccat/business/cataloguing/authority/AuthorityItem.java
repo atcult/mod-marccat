@@ -1,14 +1,19 @@
 package org.folio.marccat.business.cataloguing.authority;
 
+import java.util.Collections;
+import java.util.Comparator;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.folio.marccat.business.cataloguing.common.Tag;
 import org.folio.marccat.business.cataloguing.common.TagImpl;
-import org.folio.marccat.dao.persistence.*;
+import org.folio.marccat.dao.persistence.AUT;
+import org.folio.marccat.dao.persistence.AuthorityModelItem;
+import org.folio.marccat.dao.persistence.CatalogItem;
+import org.folio.marccat.dao.persistence.ItemEntity;
+import org.folio.marccat.dao.persistence.Model;
+import org.folio.marccat.dao.persistence.ModelItem;
 import org.folio.marccat.exception.MandatoryTagException;
-
-import java.util.Collections;
-import java.util.Comparator;
 
 
 public class AuthorityItem extends CatalogItem {
@@ -19,7 +24,6 @@ public class AuthorityItem extends CatalogItem {
 
   public AuthorityItem() {
     super();
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -53,6 +57,7 @@ public class AuthorityItem extends CatalogItem {
   /**
    * @since 1.0
    */
+  @Override
   public ModelItem getModelItem() {
     return modelItem;
   }
@@ -60,6 +65,7 @@ public class AuthorityItem extends CatalogItem {
   /**
    * @since 1.0
    */
+  @Override
   public void setModelItem(Model model) {
     this.modelItem = new AuthorityModelItem();
     this.modelItem.markNew();
@@ -93,7 +99,7 @@ public class AuthorityItem extends CatalogItem {
   /* (non-Javadoc)
    * @see CatalogItem#checkForMandatoryTags()
    */
-  public void checkForMandatoryTags() throws MandatoryTagException {
+  public void checkForMandatoryTags() {
     final String[] tags = new String[]{"000", "008", "040", "1"};
     for (int i = 0; i < tags.length; i++) {
       if (findFirstTagByNumber(tags[i]) == null) {

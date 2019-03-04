@@ -613,17 +613,15 @@ public class SortformUtils {
         if (Character.isLetterOrDigit(c)) {
           word.append(c);
         } else {
-          if (word.length() > 0) {
-            if (word.toString().startsWith("\u0644\u0622")
-              || "\u0623\u0625\0627".contains(word
-              .subSequence(0, 1))) {
+          if (word.length() > 0 && (word.toString().startsWith("\u0644\u0622")
+                  || "\u0623\u0625\0627".contains(word
+                          .subSequence(0, 1)))) {
               if (!arabicWordExceptions.contains(word.toString())) {
                 result.append(word.substring(2));
               } else {
                 result.append(word.toString());
               }
               word = new StringBuilder();
-            }
           }
           result.append(c);
         }

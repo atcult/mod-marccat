@@ -1,7 +1,9 @@
 package org.folio.marccat.dao.persistence;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.folio.marccat.business.cataloguing.authority.AuthorityClassificationAccessPoint;
-import org.folio.marccat.business.common.SortFormException;
 import org.folio.marccat.business.descriptor.SortFormParameters;
 import org.folio.marccat.business.descriptor.SortformUtils;
 import org.folio.marccat.dao.AbstractDAO;
@@ -9,9 +11,6 @@ import org.folio.marccat.dao.ClassificationDescriptorDAO;
 import org.folio.marccat.model.Subfield;
 import org.folio.marccat.shared.CorrelationValues;
 import org.folio.marccat.util.StringText;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Hibernate class for table CLSTN.
@@ -68,6 +67,7 @@ public class CLSTN extends Descriptor {
   /* (non-Javadoc)
    * @see Descriptor#getAuthorityAccessPointClass()
    */
+  @Override
   public Class getAuthorityAccessPointClass() {
     return AuthorityClassificationAccessPoint.class;
   }
@@ -192,7 +192,7 @@ public class CLSTN extends Descriptor {
   }
 
   @Override
-  public void calculateAndSetSortForm() throws SortFormException {
+  public void calculateAndSetSortForm() {
     if (ClassificationType.isLC((short) getTypeCode())) {
       setSortForm(calculateLcSortForm());
     } else if (ClassificationType.isDewey((short) getTypeCode())) {
@@ -243,18 +243,19 @@ public class CLSTN extends Descriptor {
 
   private String calculateLcSortForm() {
     StringText st = new StringText(getStringText());
+    String prefix = "\u0003";
     //stick a HEX(03) at the beginning of first subfield b
     for (Object obj : st.getSubfieldList()) {
       Subfield sub = (Subfield) obj;
       if (sub.getCode().equals("b")) {
-        sub.setContent("\u0003" + sub.getContent());
+        sub.setContent(prefix + sub.getContent());
         break;
       }
     }
     String result = st.toDisplayString().toUpperCase();
     result = SortformUtils.replacePunctuationMark1(result, " ");
     result = SortformUtils.stripMultipleBlanks(result);
-    String[] parts = result.split("\u0003");
+    String[] parts = result.split(prefix);
     if (parts[0].endsWith("*")) {
       parts[0] = parts[0].substring(0, parts[0].length() - 2) + ".";
     }
@@ -294,18 +295,19 @@ public class CLSTN extends Descriptor {
 
   private String calculateNalSortForm() {
     StringText st = new StringText(getStringText());
+    String prefix = "\u0003";
     //stick a HEX(03) at the beginning of first subfield b
     for (Object obj : st.getSubfieldList()) {
       Subfield sub = (Subfield) obj;
       if (sub.getCode().equals("b")) {
-        sub.setContent("\u0003" + sub.getContent());
+        sub.setContent(prefix + sub.getContent());
         break;
       }
     }
     String result = st.toDisplayString().toUpperCase();
     result = SortformUtils.replacePunctuationMark1(result, " ");
     result = SortformUtils.stripMultipleBlanks(result);
-    String[] parts = result.split("\u0003");
+    String[] parts = result.split(prefix);
     if (parts[0].endsWith("*")) {
       parts[0] = parts[0].substring(0, parts[0].length() - 2) + ".";
     }

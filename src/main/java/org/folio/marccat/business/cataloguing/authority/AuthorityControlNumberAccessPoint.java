@@ -2,11 +2,8 @@ package org.folio.marccat.business.cataloguing.authority;
 
 import org.folio.marccat.dao.persistence.CNTL_NBR;
 import org.folio.marccat.dao.persistence.Descriptor;
-import org.folio.marccat.exception.DataAccessException;
 import org.folio.marccat.shared.CorrelationValues;
 import org.folio.marccat.util.StringText;
-
-import java.util.List;
 
 
 public class AuthorityControlNumberAccessPoint extends AuthorityAccessPoint {
@@ -45,6 +42,7 @@ public class AuthorityControlNumberAccessPoint extends AuthorityAccessPoint {
   /* (non-Javadoc)
    * @see TagInterface#getCategory()
    */
+  @Override
   public int getCategory() {
     return 5;
   }
@@ -80,6 +78,7 @@ public class AuthorityControlNumberAccessPoint extends AuthorityAccessPoint {
   /* (non-Javadoc)
    * @see VariableField#getStringText()
    */
+@Override
   public StringText getStringText() {
     StringText s = super.getStringText();
     if (getValidationCode() != 'a') {
@@ -91,11 +90,6 @@ public class AuthorityControlNumberAccessPoint extends AuthorityAccessPoint {
   /* (non-Javadoc)
    * @see librisuite.business.cataloguing.bibliographic.Tag#getFirstCorrelationList()
    */
-  @Deprecated
-  public List getFirstCorrelationList() throws DataAccessException {
-    //return getDaoCodeTable().getList(T_AUT_CNTL_NBR_TYP.class,false);
-    return null;
-  }
 
   /**
    * @since 1.0
