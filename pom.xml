@@ -52,7 +52,7 @@
     <mod-configuration-version>5.0.2-SNAPSHOT</mod-configuration-version>
     <postgres-embedded-version>2.9</postgres-embedded-version>
     <postgresrunner-port>5434</postgresrunner-port>
-    <postgres-version>42.1.4</postgres-version>
+    <postgres-version>42.4.1</postgres-version>
   </properties>
 
 
